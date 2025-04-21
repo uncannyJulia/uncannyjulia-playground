@@ -23,8 +23,8 @@ body {
     position: absolute;
     cursor: move;
     padding: 10px;
-    width: 100px;
-    height: 130px; /* Height to fit both image and text */
+    width: 50px;
+    height: 65px; /* Height to fit both image and text */
     text-align: center;
     /* Optional: add some visual indication they're draggable */
     background-color: rgba(255, 255, 255, 0.5);
@@ -36,8 +36,8 @@ body {
     background-color: transparent;
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
 }
 
 /* Text container inside drag elements */

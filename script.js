@@ -1,5 +1,5 @@
 // Assuming you have a list of icon filenames
-const icons = ["kitty.png", "dog.png", "bunny.png"]; // Replace with your actual icons
+const icons = ["kitty.png", "dog.png", "bunny.png", "about.png", "contact.png", "folder.png"]; // Replace with your actual icons
 
 let zIndex = 1000;
 let windows = [];
@@ -13,8 +13,8 @@ function createDraggableElement(iconName, index) {
     dragElement.id = `drag-element-${index}`;
 
     // Set position with some offset between elements
-    dragElement.style.top = `${100 + (index * 150)}px`;
-    dragElement.style.left = `${20 + (index)}px`;
+    dragElement.style.top = `${10 + (index * 100)}px`;
+    dragElement.style.left = `${10 + (index)}px`;
 
     // Create image container
     const imageDiv = document.createElement("div");
