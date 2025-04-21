@@ -1,9 +1,60 @@
-// Assuming you have a list of icon filenames
+// loading and declaring variables
 const icons = ["kitty.png", "dog.png", "bunny.png", "about.png", "contact.png", "folder.png"]; // Replace with your actual icons
+const klick = new Audio('klick.mp3');
+
+const date = new Date()
+const options = {
+  hour: 'numeric',
+  minute: 'numeric',
+  hour12: true
+};
 
 let zIndex = 1000;
 let windows = [];
 let activeWindow = null;
+
+// instatiate the taskbar and the clock
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if taskbar exists, create it if it doesn't
+    if (!document.getElementById('taskbar')) {
+        const taskbar = document.createElement('div');
+        taskbar.id = 'taskbar';
+        document.body.appendChild(taskbar);
+    } else {
+        // Clear existing taskbar if it exists
+        const taskbar = document.getElementById('taskbar');
+        taskbar.innerHTML = '';
+    }
+
+    // Create left container for window items
+    const leftContainer = document.createElement('div');
+    leftContainer.id = 'taskbar-left';
+    leftContainer.className = 'taskbar-left';
+
+    // Create clock element
+    const timeElement = document.createElement('div');
+    timeElement.id = 'taskbar-time';
+    timeElement.className = 'taskbar-time';
+
+    // Add both to taskbar
+    const taskbar = document.getElementById('taskbar');
+    taskbar.appendChild(leftContainer);
+    taskbar.appendChild(timeElement);
+
+    // Start the clock
+    updateClock();
+    setInterval(updateClock, 1000);
+});
+
+
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+
+    document.getElementById('taskbar-time').textContent = timeString;
+}
 
 // Function to create a draggable element
 function createDraggableElement(iconName, index) {
@@ -98,7 +149,11 @@ icons.forEach((icon, index) => {
     createDraggableElement(icon, index);
 });
 
-const firstWindow = createWindow("Welcome", "This is a playground and ode to my childhood that was all anime and computer games. Its a forever work in progress. Since the internet is bland and ripped off its individuality, lets bring back the personal spirit of the old days! Feel free to stroll and frollock and if you fancy leave me a message. credits to: Kawaii Lineal color from freepik.com for the icons", '#8d95e7', 300, 500);
+// make a sound when the page loads with the first message
+setTimeout(() => {
+    klick.play();
+    const firstWindow = createWindow("Welcome", "This is a playground and ode to my childhood that was all anime and computer games. Its a forever work in progress. Since the internet is bland and ripped off its individuality, lets bring back the personal spirit of the old days! Feel free to stroll and frollock and if you fancy leave me a message. credits to: Kawaii Lineal color from freepik.com for the icons and Sound Effect by https://pixabay.com/users/u_fy1kpv89mt-49425146/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=31629>u_fy1kpv89mt://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=316298", '#8d95e7', 300, 500);
+}, 1000);
 
 function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300) {
     const windowId = 'window-' + Date.now();
@@ -208,7 +263,7 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
 
 // Add window to taskbar
 function addToTaskbar(windowId, title) {
-    const taskbar = document.getElementById('taskbar');
+    const leftContainer = document.getElementById('taskbar-left');
     const taskbarItem = document.createElement('div');
     taskbarItem.className = 'taskbar-item';
     taskbarItem.textContent = title;
@@ -226,10 +281,19 @@ function addToTaskbar(windowId, title) {
         }
     });
 
-    taskbar.appendChild(taskbarItem);
+
+
+    // Get reference to the time element
+    const timeElement = document.getElementById('taskbar-time');
+
+    // Insert taskbar item before the time element
+    // This is the key change - insert before the clock, not after
+    taskbar.insertBefore(taskbarItem, timeElement);
 }
 
-// Set active window (bring to front)
+
+
+// handle all the window events
 function setActiveWindow(windowElement) {
     if (activeWindow) {
         activeWindow.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';

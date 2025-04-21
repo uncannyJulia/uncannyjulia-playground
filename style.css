@@ -152,28 +152,51 @@ body {
             border-radius: 0;
         }
 
+/* CSS to position taskbar items on the left and clock on the right */
+
 #taskbar {
+    display: flex; /* Use flexbox layout */
+    align-items: center; /* Center items vertically */
+    justify-content: flex-start; /* Start items from the left */
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
+    right: 0;
     height: 40px;
-    background-color: #8d95e7;
-    display: flex;
-    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
     padding: 0 10px;
-    z-index: 9999;
+    z-index: 10000;
 }
 
+/* Style for the clock - pushed to the right */
+.taskbar-time {
+    margin-left: auto; /* This is the key property - pushes it to the right */
+    height: 30px;
+    padding: 0 10px;
+    color: white;
+    background-color: #8d95e7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: default;
+    transition: background-color 0.2s;
+    font-weight: bold;
+}
+
+/* Style for window items - staying on the left */
 .taskbar-item {
     height: 30px;
     padding: 0 10px;
     color: white;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #8d95e7;
     border-radius: 4px;
-    margin-right: 5px;
+    margin-right: 5px; /* Space between items */
     display: flex;
     align-items: center;
     cursor: pointer;
     transition: background-color 0.2s;
+}
+
+.taskbar-item:hover {
+    background-color: #8d95e7;
 }
