@@ -13,7 +13,7 @@ let zIndex = 1000;
 let windows = [];
 let activeWindow = null;
 
-// instatiate the taskbar and the clock
+// instantiate the taskbar and the clock
 document.addEventListener('DOMContentLoaded', function() {
     // Check if taskbar exists, create it if it doesn't
     if (!document.getElementById('taskbar')) {
@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateClock();
     setInterval(updateClock, 1000);
 });
-
 
 function updateClock() {
     const now = new Date();
@@ -107,10 +106,12 @@ function createDraggableElement(iconName, index) {
     });
 }
 
+// This function handles both mouse and touch dragging for icons
 function makeDraggable(element) {
     let initX, initY, firstX, firstY;
     let hasMoved = false;
 
+    // MOUSE EVENTS
     element.addEventListener("mousedown", function(e) {
         e.preventDefault();
 
@@ -141,8 +142,62 @@ function makeDraggable(element) {
             }
         }, {once: true});
     });
-}
 
+    // TOUCH EVENTS
+    let touchStartTime;
+
+    element.addEventListener("touchstart", function(e) {
+        const touch = e.touches[0];
+
+        touchStartTime = new Date().getTime();
+
+        initX = this.offsetLeft;
+        initY = this.offsetTop;
+        firstX = touch.pageX;
+        firstY = touch.pageY;
+        hasMoved = false;
+
+        const touchMoveHandler = function(e) {
+            e.preventDefault(); // Prevent scrolling
+            const touch = e.touches[0];
+            element.style.left = (initX + (touch.pageX - firstX)) + "px";
+            element.style.top = (initY + (touch.pageY - firstY)) + "px";
+
+            // If we moved more than a few pixels, consider it a drag rather than a tap
+            if (Math.abs(touch.pageX - firstX) > 10 || Math.abs(touch.pageY - firstY) > 10) {
+                element.isDragging = true;
+                hasMoved = true;
+            }
+        };
+
+        const touchEndHandler = function() {
+            document.removeEventListener("touchmove", touchMoveHandler);
+
+            // Check if this was a quick tap (for double-tap detection)
+            const touchEndTime = new Date().getTime();
+
+            // Only mark as dragging if actually moved
+            if (!hasMoved) {
+                element.isDragging = false;
+
+                // Detect double-tap (within 300ms of last tap)
+                if (element.lastTapTime && (touchEndTime - element.lastTapTime) < 300) {
+                    // Double-tap detected - open window
+                    const label = element.querySelector('.drag-element-text p').textContent;
+                    createWindow(label, `This is the ${label} application window`);
+                }
+
+                // Store the last tap time for double-tap detection
+                element.lastTapTime = touchEndTime;
+            }
+
+            document.removeEventListener("touchend", touchEndHandler);
+        };
+
+        document.addEventListener("touchmove", touchMoveHandler);
+        document.addEventListener("touchend", touchEndHandler);
+    });
+}
 
 // Create an element for each icon
 icons.forEach((icon, index) => {
@@ -258,7 +313,7 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
         setActiveWindow(window);
     });
 
-    setupWindowTouchEvents(window)
+    setupWindowTouchEvents(window);
     return window;
 }
 
@@ -282,19 +337,11 @@ function addToTaskbar(windowId, title) {
         }
     });
 
-
-
-    // Get reference to the time element
-    const timeElement = document.getElementById('taskbar-time');
-
-    // Insert taskbar item before the time element
-    // This is the key change - insert before the clock, not after
-    taskbar.insertBefore(taskbarItem, timeElement);
+    // Add to the items container (not directly to taskbar)
+    leftContainer.appendChild(taskbarItem);
 }
 
-
-
-// handle all the window events
+// Handle all the window events
 function setActiveWindow(windowElement) {
     if (activeWindow) {
         activeWindow.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
@@ -362,10 +409,11 @@ function closeWindow(windowElement) {
     windowElement.remove();
 }
 
-// Setup window dragging
+// Setup window dragging function that maintains both mouse and touch events
 function setupDragging(windowElement, headerElement) {
     let offsetX, offsetY;
 
+    // MOUSE EVENTS
     const onMouseDown = (e) => {
         // Ignore if maximized
         const windowObj = windows.find(w => w.id === windowElement.id);
@@ -394,10 +442,44 @@ function setupDragging(windowElement, headerElement) {
     };
 
     headerElement.addEventListener('mousedown', onMouseDown);
+
+    // TOUCH EVENTS
+    const onTouchStart = (e) => {
+        // Ignore if maximized
+        const windowObj = windows.find(w => w.id === windowElement.id);
+        if (windowObj && windowObj.maximized) {
+            return;
+        }
+
+        const touch = e.touches[0];
+        offsetX = touch.clientX - windowElement.getBoundingClientRect().left;
+        offsetY = touch.clientY - windowElement.getBoundingClientRect().top;
+
+        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchend', onTouchEnd);
+
+        // Set as active window
+        setActiveWindow(windowElement);
+    };
+
+    const onTouchMove = (e) => {
+        e.preventDefault(); // Prevent scrolling when dragging
+        const touch = e.touches[0];
+        windowElement.style.left = (touch.clientX - offsetX) + 'px';
+        windowElement.style.top = (touch.clientY - offsetY) + 'px';
+    };
+
+    const onTouchEnd = () => {
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    headerElement.addEventListener('touchstart', onTouchStart);
 }
 
-// Setup window resizing
+// Setup window resizing with both mouse and touch events
 function setupResizing(windowElement, resizeHandle) {
+    // MOUSE EVENTS
     let startX, startY, startWidth, startHeight;
 
     const onMouseDown = (e) => {
@@ -441,111 +523,8 @@ function setupResizing(windowElement, resizeHandle) {
     };
 
     resizeHandle.addEventListener('mousedown', onMouseDown);
-}
 
-// touch events
-
-function makeDraggableTouchFriendly(element) {
-    let initX, initY, firstX, firstY;
-    let hasMoved = false;
-    let touchStartTime;
-
-    // Add touch event listeners
-    element.addEventListener("touchstart", function(e) {
-        e.preventDefault(); // Prevent default touch behavior like scrolling
-
-        touchStartTime = new Date().getTime();
-
-        const touch = e.touches[0];
-        initX = this.offsetLeft;
-        initY = this.offsetTop;
-        firstX = touch.pageX;
-        firstY = touch.pageY;
-        hasMoved = false;
-
-        const touchMoveHandler = function(e) {
-            const touch = e.touches[0];
-            element.style.left = (initX + (touch.pageX - firstX)) + "px";
-            element.style.top = (initY + (touch.pageY - firstY)) + "px";
-
-            // If we moved more than a few pixels, consider it a drag rather than a tap
-            if (Math.abs(touch.pageX - firstX) > 10 || Math.abs(touch.pageY - firstY) > 10) {
-                element.isDragging = true;
-                hasMoved = true;
-            }
-        };
-
-        const touchEndHandler = function() {
-            document.removeEventListener("touchmove", touchMoveHandler);
-
-            // Check if this was a quick tap (for double-tap detection)
-            const touchEndTime = new Date().getTime();
-            const tapDuration = touchEndTime - touchStartTime;
-
-            // Only mark as dragging if actually moved
-            if (!hasMoved) {
-                element.isDragging = false;
-
-                // Detect double-tap (within 300ms of last tap)
-                if (element.lastTapTime && (touchEndTime - element.lastTapTime) < 300) {
-                    // Double-tap detected - open window
-                    const label = element.querySelector('.drag-element-text p').textContent;
-                    createWindow(label, `This is the ${label} application window`);
-                }
-
-                // Store the last tap time for double-tap detection
-                element.lastTapTime = touchEndTime;
-            }
-
-            document.removeEventListener("touchend", touchEndHandler);
-        };
-
-        document.addEventListener("touchmove", touchMoveHandler);
-        document.addEventListener("touchend", touchEndHandler);
-    });
-}
-
-// For the window dragging
-function setupDraggingTouchFriendly(windowElement, headerElement) {
-    let offsetX, offsetY;
-
-    const onTouchStart = (e) => {
-        // Ignore if maximized
-        const windowObj = windows.find(w => w.id === windowElement.id);
-        if (windowObj && windowObj.maximized) {
-            return;
-        }
-
-        const touch = e.touches[0];
-        offsetX = touch.clientX - windowElement.getBoundingClientRect().left;
-        offsetY = touch.clientY - windowElement.getBoundingClientRect().top;
-
-        document.addEventListener('touchmove', onTouchMove);
-        document.addEventListener('touchend', onTouchEnd);
-
-        // Set as active window
-        setActiveWindow(windowElement);
-    };
-
-    const onTouchMove = (e) => {
-        e.preventDefault(); // Prevent scrolling when dragging
-        const touch = e.touches[0];
-        windowElement.style.left = (touch.clientX - offsetX) + 'px';
-        windowElement.style.top = (touch.clientY - offsetY) + 'px';
-    };
-
-    const onTouchEnd = () => {
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', onTouchEnd);
-    };
-
-    headerElement.addEventListener('touchstart', onTouchStart);
-}
-
-// For window resizing
-function setupResizingTouchFriendly(windowElement, resizeHandle) {
-    let startX, startY, startWidth, startHeight;
-
+    // TOUCH EVENTS
     const onTouchStart = (e) => {
         // Ignore if maximized
         const windowObj = windows.find(w => w.id === windowElement.id);
@@ -592,59 +571,7 @@ function setupResizingTouchFriendly(windowElement, resizeHandle) {
     resizeHandle.addEventListener('touchstart', onTouchStart);
 }
 
-// Update your existing functions to add touch support
-function makeDraggable(element) {
-    // Keep your existing mouse code
-
-    // Add touch support
-    makeDraggableTouchFriendly(element);
-}
-
-function setupDragging(windowElement, headerElement) {
-    // Keep your existing mouse code
-
-    // Add touch support
-    setupDraggingTouchFriendly(windowElement, headerElement);
-}
-
-function setupResizing(windowElement, resizeHandle) {
-    // Keep your existing mouse code
-
-    // Add touch support
-    setupResizingTouchFriendly(windowElement, resizeHandle);
-}
-
-// Also add touch events to window control buttons
-function addTouchToWindowControls() {
-    // For minimize button
-    document.querySelectorAll('.window-minimize').forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const windowElement = btn.closest('.window');
-            minimizeWindow(windowElement);
-        });
-    });
-
-    // For maximize button
-    document.querySelectorAll('.window-maximize').forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const windowElement = btn.closest('.window');
-            maximizeWindow(windowElement);
-        });
-    });
-
-    // For close button
-    document.querySelectorAll('.window-close').forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const windowElement = btn.closest('.window');
-            closeWindow(windowElement);
-        });
-    });
-}
-
-// Call this function whenever you create a new window
+// Setup touch events for window controls
 function setupWindowTouchEvents(windowElement) {
     const minimizeBtn = windowElement.querySelector('.window-minimize');
     const maximizeBtn = windowElement.querySelector('.window-maximize');
