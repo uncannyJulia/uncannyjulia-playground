@@ -258,6 +258,7 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
         setActiveWindow(window);
     });
 
+    setupWindowTouchEvents(window)
     return window;
 }
 
@@ -440,4 +441,232 @@ function setupResizing(windowElement, resizeHandle) {
     };
 
     resizeHandle.addEventListener('mousedown', onMouseDown);
+}
+
+// touch events
+
+function makeDraggableTouchFriendly(element) {
+    let initX, initY, firstX, firstY;
+    let hasMoved = false;
+    let touchStartTime;
+
+    // Add touch event listeners
+    element.addEventListener("touchstart", function(e) {
+        e.preventDefault(); // Prevent default touch behavior like scrolling
+
+        touchStartTime = new Date().getTime();
+
+        const touch = e.touches[0];
+        initX = this.offsetLeft;
+        initY = this.offsetTop;
+        firstX = touch.pageX;
+        firstY = touch.pageY;
+        hasMoved = false;
+
+        const touchMoveHandler = function(e) {
+            const touch = e.touches[0];
+            element.style.left = (initX + (touch.pageX - firstX)) + "px";
+            element.style.top = (initY + (touch.pageY - firstY)) + "px";
+
+            // If we moved more than a few pixels, consider it a drag rather than a tap
+            if (Math.abs(touch.pageX - firstX) > 10 || Math.abs(touch.pageY - firstY) > 10) {
+                element.isDragging = true;
+                hasMoved = true;
+            }
+        };
+
+        const touchEndHandler = function() {
+            document.removeEventListener("touchmove", touchMoveHandler);
+
+            // Check if this was a quick tap (for double-tap detection)
+            const touchEndTime = new Date().getTime();
+            const tapDuration = touchEndTime - touchStartTime;
+
+            // Only mark as dragging if actually moved
+            if (!hasMoved) {
+                element.isDragging = false;
+
+                // Detect double-tap (within 300ms of last tap)
+                if (element.lastTapTime && (touchEndTime - element.lastTapTime) < 300) {
+                    // Double-tap detected - open window
+                    const label = element.querySelector('.drag-element-text p').textContent;
+                    createWindow(label, `This is the ${label} application window`);
+                }
+
+                // Store the last tap time for double-tap detection
+                element.lastTapTime = touchEndTime;
+            }
+
+            document.removeEventListener("touchend", touchEndHandler);
+        };
+
+        document.addEventListener("touchmove", touchMoveHandler);
+        document.addEventListener("touchend", touchEndHandler);
+    });
+}
+
+// For the window dragging
+function setupDraggingTouchFriendly(windowElement, headerElement) {
+    let offsetX, offsetY;
+
+    const onTouchStart = (e) => {
+        // Ignore if maximized
+        const windowObj = windows.find(w => w.id === windowElement.id);
+        if (windowObj && windowObj.maximized) {
+            return;
+        }
+
+        const touch = e.touches[0];
+        offsetX = touch.clientX - windowElement.getBoundingClientRect().left;
+        offsetY = touch.clientY - windowElement.getBoundingClientRect().top;
+
+        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchend', onTouchEnd);
+
+        // Set as active window
+        setActiveWindow(windowElement);
+    };
+
+    const onTouchMove = (e) => {
+        e.preventDefault(); // Prevent scrolling when dragging
+        const touch = e.touches[0];
+        windowElement.style.left = (touch.clientX - offsetX) + 'px';
+        windowElement.style.top = (touch.clientY - offsetY) + 'px';
+    };
+
+    const onTouchEnd = () => {
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    headerElement.addEventListener('touchstart', onTouchStart);
+}
+
+// For window resizing
+function setupResizingTouchFriendly(windowElement, resizeHandle) {
+    let startX, startY, startWidth, startHeight;
+
+    const onTouchStart = (e) => {
+        // Ignore if maximized
+        const windowObj = windows.find(w => w.id === windowElement.id);
+        if (windowObj && windowObj.maximized) {
+            return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startWidth = parseInt(document.defaultView.getComputedStyle(windowElement).width, 10);
+        startHeight = parseInt(document.defaultView.getComputedStyle(windowElement).height, 10);
+
+        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchend', onTouchEnd);
+
+        // Set as active window
+        setActiveWindow(windowElement);
+    };
+
+    const onTouchMove = (e) => {
+        e.preventDefault(); // Prevent scrolling
+        const touch = e.touches[0];
+        const newWidth = startWidth + touch.clientX - startX;
+        const newHeight = startHeight + touch.clientY - startY;
+
+        if (newWidth > 200) {
+            windowElement.style.width = newWidth + 'px';
+        }
+
+        if (newHeight > 150) {
+            windowElement.style.height = newHeight + 'px';
+        }
+    };
+
+    const onTouchEnd = () => {
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    resizeHandle.addEventListener('touchstart', onTouchStart);
+}
+
+// Update your existing functions to add touch support
+function makeDraggable(element) {
+    // Keep your existing mouse code
+
+    // Add touch support
+    makeDraggableTouchFriendly(element);
+}
+
+function setupDragging(windowElement, headerElement) {
+    // Keep your existing mouse code
+
+    // Add touch support
+    setupDraggingTouchFriendly(windowElement, headerElement);
+}
+
+function setupResizing(windowElement, resizeHandle) {
+    // Keep your existing mouse code
+
+    // Add touch support
+    setupResizingTouchFriendly(windowElement, resizeHandle);
+}
+
+// Also add touch events to window control buttons
+function addTouchToWindowControls() {
+    // For minimize button
+    document.querySelectorAll('.window-minimize').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const windowElement = btn.closest('.window');
+            minimizeWindow(windowElement);
+        });
+    });
+
+    // For maximize button
+    document.querySelectorAll('.window-maximize').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const windowElement = btn.closest('.window');
+            maximizeWindow(windowElement);
+        });
+    });
+
+    // For close button
+    document.querySelectorAll('.window-close').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const windowElement = btn.closest('.window');
+            closeWindow(windowElement);
+        });
+    });
+}
+
+// Call this function whenever you create a new window
+function setupWindowTouchEvents(windowElement) {
+    const minimizeBtn = windowElement.querySelector('.window-minimize');
+    const maximizeBtn = windowElement.querySelector('.window-maximize');
+    const closeBtn = windowElement.querySelector('.window-close');
+
+    minimizeBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        minimizeWindow(windowElement);
+    });
+
+    maximizeBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        maximizeWindow(windowElement);
+    });
+
+    closeBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        closeWindow(windowElement);
+    });
+
+    // Add touchstart for activating window
+    windowElement.addEventListener('touchstart', () => {
+        setActiveWindow(windowElement);
+    });
 }
