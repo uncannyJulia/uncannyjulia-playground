@@ -1,16 +1,28 @@
 /**
- * Creates and manages a side panel for displaying node details
+ * Creates and manages a permanent side panel for displaying node details
+ * Always visible and shows debug info
  */
 export class SidePanel {
   constructor() {
     this.panel = null;
     this.contentArea = null;
+    this.debugSection = null;
     this.currentNodeId = null;
-    this.isVisible = false;
     this.detailsData = {};
+    this.graphStats = {
+      totalNodes: 0,
+      visibleNodes: 0,
+      expandedNodes: 0,
+      nodeTypes: {}
+    };
 
     // Create the panel element
     this.createPanel();
+
+    // Show initial debug content
+    this.showDebugInfo();
+
+    console.log('Permanent side panel initialized');
   }
 
   /**
@@ -20,7 +32,7 @@ export class SidePanel {
     // Create the panel container
     this.panel = document.createElement('div');
     this.panel.className = 'side-panel';
-    this.panel.style.display = 'none';
+    this.panel.id = 'node-side-panel';
 
     // Create header
     const header = document.createElement('div');
@@ -29,41 +41,50 @@ export class SidePanel {
     // Title area
     this.titleElement = document.createElement('h2');
     this.titleElement.className = 'panel-title';
-    this.titleElement.textContent = 'Node Details';
+    this.titleElement.textContent = 'Graph Explorer';
     header.appendChild(this.titleElement);
-
-    // Close button
-    const closeButton = document.createElement('button');
-    closeButton.className = 'panel-close';
-    closeButton.innerHTML = '×';
-    closeButton.setAttribute('aria-label', 'Close panel');
-    closeButton.addEventListener('click', () => this.hide());
-    header.appendChild(closeButton);
 
     this.panel.appendChild(header);
 
     // Create content area
     this.contentArea = document.createElement('div');
     this.contentArea.className = 'panel-content';
+
+    // Add initial placeholder
+    this.contentArea.innerHTML = `
+      <div class="info-section">
+        <p>Double-click any node to view its details here.</p>
+      </div>
+    `;
+
     this.panel.appendChild(this.contentArea);
+
+    // Add debug section
+    this.debugSection = document.createElement('div');
+    this.debugSection.className = 'debug-section';
+    this.debugSection.innerHTML = '<h3>Debug Information</h3><div id="debug-content"></div>';
+    this.contentArea.appendChild(this.debugSection);
 
     // Add to document
     document.body.appendChild(this.panel);
+
+    console.log('Permanent side panel created:', this.panel);
   }
 
   /**
-   * Shows the panel with details for a specific node
+   * Shows details for a specific node
    * @param {Object} node - The node data object
    */
-  show(node) {
+  showNode(node) {
     if (!node) return;
 
+    console.log('Showing node details:', node);
     this.currentNodeId = node.id;
 
     // Update title
     this.titleElement.textContent = node.text;
 
-    // Clear previous content
+    // Clear previous content (except debug section)
     this.contentArea.innerHTML = '';
 
     // Create basic info section
@@ -98,47 +119,67 @@ export class SidePanel {
           Additional details for "${node.text}" can be added here.
         </p>
         <p class="placeholder-text">
-          Double-click on this node again to edit details.
+          Properties:
         </p>
+        <pre>${JSON.stringify(node, null, 2)}</pre>
       `;
     }
 
     this.contentArea.appendChild(detailsSection);
 
-    // Show the panel
-    this.panel.style.display = 'block';
-    this.isVisible = true;
-
-    // Add visible class for transition
-    setTimeout(() => {
-      this.panel.classList.add('visible');
-    }, 10);
+    // Add debug section back
+    this.updateDebugSection();
   }
 
   /**
-   * Hides the panel
+   * Updates graph statistics
+   * @param {Object} stats - Current graph statistics
    */
-  hide() {
-    this.panel.classList.remove('visible');
-
-    // Wait for transition to complete before hiding
-    setTimeout(() => {
-      this.panel.style.display = 'none';
-      this.isVisible = false;
-      this.currentNodeId = null;
-    }, 300);
+  updateStats(stats) {
+    this.graphStats = stats;
+    this.updateDebugSection();
   }
 
   /**
-   * Toggles the panel visibility for a node
-   * @param {Object} node - The node data object
+   * Updates or creates the debug section
    */
-  toggle(node) {
-    if (this.isVisible && this.currentNodeId === node.id) {
-      this.hide();
-    } else {
-      this.show(node);
+  updateDebugSection() {
+    // Create debug section if it doesn't exist
+    if (!this.debugSection) {
+      this.debugSection = document.createElement('div');
+      this.debugSection.className = 'debug-section';
+      this.contentArea.appendChild(this.debugSection);
     }
+
+    // Update content
+    this.debugSection.innerHTML = `
+      <h3>Debug Information</h3>
+      <ul class="debug-list">
+        <li>Total Nodes: <span class="debug-count">${this.graphStats.totalNodes}</span></li>
+        <li>Visible Nodes: <span class="debug-count">${this.graphStats.visibleNodes}</span></li>
+        <li>Expanded Nodes: <span class="debug-count">${this.graphStats.expandedNodes}</span></li>
+      </ul>
+      
+      <h3>Node Types</h3>
+      <ul class="debug-list">
+        ${Object.entries(this.graphStats.nodeTypes).map(([type, count]) => 
+          `<li>${type}: <span class="debug-count">${count}</span></li>`
+        ).join('')}
+      </ul>
+      
+      <h3>Current Node</h3>
+      <p>${this.currentNodeId ? `ID: ${this.currentNodeId}` : 'None selected'}</p>
+    `;
+  }
+
+  /**
+   * Shows debug information in the panel
+   */
+  showDebugInfo() {
+    this.titleElement.textContent = 'Graph Explorer';
+
+    // Create basic debug info
+    this.updateDebugSection();
   }
 
   /**
@@ -150,10 +191,11 @@ export class SidePanel {
     this.detailsData[nodeId] = htmlContent;
 
     // If this node is currently shown, update the display
-    if (this.isVisible && this.currentNodeId === nodeId) {
+    if (this.currentNodeId === nodeId) {
       const detailsSection = this.contentArea.querySelector('.details-section');
       if (detailsSection) {
         detailsSection.innerHTML = htmlContent;
+        this.updateDebugSection();
       }
     }
   }

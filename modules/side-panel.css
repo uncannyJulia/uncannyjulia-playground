@@ -1,21 +1,23 @@
-/* Side Panel Styles */
+/* Side Panel Styles - Always Visible Version */
 .side-panel {
   position: fixed;
   top: 0;
-  right: -350px;
-  width: 350px;
+  right: 0;
+  width: 30%; /* Take up 30% of screen width */
   height: 100%;
   background-color: #111;
-  border-left: 1px solid #333;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+  border-left: 3px solid #ff9900; /* Bright orange border for visibility */
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.7);
   z-index: 1000;
-  transition: right 0.3s ease-in-out;
   overflow-y: auto;
   color: #fff;
+  font-family: Arial, sans-serif;
 }
 
-.side-panel.visible {
-  right: 0;
+/* Make main content area adjust for panel */
+#chartId {
+  width: 70% !important; /* Adjust for side panel */
+  height: 100vh;
 }
 
 .panel-header {
@@ -24,7 +26,7 @@
   align-items: center;
   padding: 15px;
   background-color: #222;
-  border-bottom: 1px solid #333;
+  border-bottom: 2px solid #ff9900;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -37,49 +39,30 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 280px;
-}
-
-.panel-close {
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  height: 30px;
-  width: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.panel-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  max-width: 80%;
+  color: #ff9900;
 }
 
 .panel-content {
-  padding: 15px;
+  padding: 20px;
 }
 
 .info-section {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .type-badge {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: bold;
   background-color: #333;
   color: white;
+  align-self: flex-start;
 }
 
 .type-badge.interest {
@@ -95,25 +78,76 @@
 }
 
 .node-id {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-top: 5px;
 }
 
 .details-section {
   border-top: 1px solid #333;
-  padding-top: 15px;
+  padding-top: 20px;
+  margin-top: 10px;
 }
 
 .placeholder-text {
-  color: #777;
+  color: #999;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+/* Debug section */
+.debug-section {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #222;
+  border-radius: 5px;
+  border-left: 3px solid #6699cc;
+}
+
+.debug-section h3 {
+  margin-top: 0;
+  color: #6699cc;
+  font-size: 1rem;
+}
+
+.debug-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 10px 0;
+}
+
+.debug-list li {
+  margin-bottom: 8px;
+  padding-left: 10px;
+  border-left: 2px solid #444;
+}
+
+.debug-count {
+  display: inline-block;
+  background: #333;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  margin-left: 5px;
 }
 
 /* Responsive adjustments */
-@media (max-width: 600px) {
+@media (max-width: 1200px) {
   .side-panel {
-    width: 85%;
-    right: -85%;
+    width: 35%;
+  }
+
+  #chartId {
+    width: 65% !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .side-panel {
+    width: 40%;
+  }
+
+  #chartId {
+    width: 60% !important;
   }
 }

@@ -11,11 +11,14 @@ import { SidePanel } from './modules/sidePanel.js';
 document.addEventListener('DOMContentLoaded', () => {
   console.log('D3 is loaded and working');
 
+  // Force background color
+  document.body.style.backgroundColor = "#000";
+
   // Get the container dimensions
   const container = d3.select("#chartId");
 
   // Set initial dimensions based on the current window
-  let width = window.innerWidth;
+  let width = window.innerWidth * 0.7; // Adjust for panel taking 30%
   let height = window.innerHeight;
 
   // Create responsive SVG that fills its container
@@ -33,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const linksGroup = graphGroup.append('g').attr('class', 'links');
   const nodesGroup = graphGroup.append('g').attr('class', 'nodes');
 
-  // Initialize the side panel
+  // Initialize the side panel - always visible
   const sidePanel = new SidePanel();
 
   // Create arrow markers for links
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch('graph_data.json');
       const graphData = await response.json();
-      console.log('Data loaded successfully');
+      console.log('Data loaded successfully', graphData);
 
       // Initialize graph explorer with life events as starting nodes
       graphExplorer = new GraphExplorer(graphData);
@@ -103,15 +106,45 @@ document.addEventListener('DOMContentLoaded', () => {
       // Set up callback for when graph changes
       graphExplorer.onGraphChange = (newGraphData, newNodes, newLinks, toggledNodeId, isExpanded, removedNodes, removedLinks) => {
         updateGraph(newGraphData, newNodes, newLinks, toggledNodeId, isExpanded, removedNodes, removedLinks);
+
+        // Update debug stats
+        updateSidePanelStats(graphExplorer, newGraphData);
       };
 
       // Create initial graph
       initializeGraph(graphExplorer.getVisibleGraph());
+
+      // Initial stats update
+      updateSidePanelStats(graphExplorer, graphExplorer.getVisibleGraph());
     } catch (error) {
       console.error('Error loading data:', error);
       console.log('Failed to load data, check if graph_data.json exists');
+
+      // Alert the user
+      alert('Failed to load graph data. Check console for details.');
     }
   };
+
+  // Function to update the side panel stats
+  function updateSidePanelStats(explorer, currentData) {
+    // Count node types
+    const nodeTypes = {};
+    explorer.fullData.nodes.forEach(node => {
+      const type = node.type || 'unknown';
+      nodeTypes[type] = (nodeTypes[type] || 0) + 1;
+    });
+
+    // Compile stats
+    const stats = {
+      totalNodes: explorer.fullData.nodes.length,
+      visibleNodes: currentData.nodes.length,
+      expandedNodes: explorer.expandedNodeIds.size,
+      nodeTypes: nodeTypes
+    };
+
+    // Update panel
+    sidePanel.updateStats(stats);
+  }
 
   // Function to initialize node positions based on relative coordinates
   function initializeNodePositions(graphData) {
@@ -129,6 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Main function to build the graph
   function initializeGraph(graphData) {
+    console.log('Initializing graph with data:', graphData);
+
     // Initialize node positions before starting the simulation
     initializeNodePositions(graphData);
 
@@ -175,10 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Return the path data
         return shapeConfig(nodeRadius).path;
       })
-      .attr('fill', '#000000');
-
-    // Apply the appropriate stroke styles based on node type
-    applyNodeStyles(nodeGroup);
+      .attr('fill', '#000000')
+      .attr('stroke', '#ffffff') // Explicitly set stroke to white
+      .attr('stroke-width', d => d.fixed ? 2.5 : 1.5); // Set stroke width based on fixed status
 
     // Add expand/collapse icons to nodes
     updateNodeIcons();
@@ -192,8 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to update dimensions and constraints
     const updateDimensions = () => {
-      // Get new window dimensions
-      width = window.innerWidth;
+      // Get new window dimensions - adjust for side panel
+      width = window.innerWidth * 0.7;
       height = window.innerHeight;
 
       // Update SVG size to match window
@@ -262,18 +296,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Double-click to open side panel
+    // Double-click to show node details in side panel
     nodeGroup.on('dblclick', (event, d) => {
       event.stopPropagation();
+      event.preventDefault(); // Prevent default double-click behavior
 
-      // Open side panel with node details
-      sidePanel.toggle(d);
+      // Show node details in side panel
+      sidePanel.showNode(d);
+
+      // Return false to prevent other handlers
+      return false;
     });
 
     // Double-click on background to reset zoom
-    svg.on('dblclick', () => {
-      svg.transition().duration(750)
-        .call(zoom.transform, d3.zoomIdentity);
+    svg.on('dblclick', (event) => {
+      // Only reset zoom if we're clicking the background (not a node)
+      if (event.target === svg.node()) {
+        svg.transition().duration(750)
+          .call(zoom.transform, d3.zoomIdentity);
+      }
     });
 
     // Clear selection when clicking on background
@@ -359,10 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const shapeConfig = nodeShapes[nodeType] || nodeShapes['interest'];
         return shapeConfig(nodeRadius).path;
       })
-      .attr('fill', '#000000');
-
-    // Apply node styles
-    applyNodeStyles(nodeEnter);
+      .attr('fill', '#000000')
+      .attr('stroke', '#ffffff') // Explicitly set stroke to white
+      .attr('stroke-width', d => d.fixed ? 2.5 : 1.5); // Set stroke width based on fixed status
 
     // Add titles
     nodeEnter.append('title')
@@ -400,9 +440,13 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .on('dblclick', (event, d) => {
       event.stopPropagation();
+      event.preventDefault(); // Prevent default double-click behavior
 
-      // Open side panel with node details
-      sidePanel.toggle(d);
+      // Show node details in side panel
+      sidePanel.showNode(d);
+
+      // Return false to prevent zoom
+      return false;
     });
 
     // Transition new nodes in
