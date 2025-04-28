@@ -1,0 +1,119 @@
+/* Side Panel Styles */
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: -350px;
+  width: 350px;
+  height: 100%;
+  background-color: #111;
+  border-left: 1px solid #333;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  transition: right 0.3s ease-in-out;
+  overflow-y: auto;
+  color: #fff;
+}
+
+.side-panel.visible {
+  right: 0;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #222;
+  border-bottom: 1px solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+.panel-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.panel-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.panel-content {
+  padding: 15px;
+}
+
+.info-section {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  background-color: #333;
+  color: white;
+}
+
+.type-badge.interest {
+  background-color: #003366;
+}
+
+.type-badge.life-event {
+  background-color: #660033;
+}
+
+.type-badge.skill {
+  background-color: #006633;
+}
+
+.node-id {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.details-section {
+  border-top: 1px solid #333;
+  padding-top: 15px;
+}
+
+.placeholder-text {
+  color: #777;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .side-panel {
+    width: 85%;
+    right: -85%;
+  }
+}

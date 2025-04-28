@@ -183,6 +183,12 @@ body {
     font-weight: bold;
 }
 
+.taskbar-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 /* Style for window items - staying on the left */
 .taskbar-item {
     height: 30px;
@@ -199,4 +205,8 @@ body {
 
 .taskbar-item:hover {
     background-color: #8d95e7;
+}
+
+.taskbar-item.minimized {
+    background-color: rgba(255, 255, 255, 0.2);
 }

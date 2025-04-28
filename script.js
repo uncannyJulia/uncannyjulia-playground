@@ -98,7 +98,10 @@ function createDraggableElement(iconName, index) {
     dragElement.addEventListener("dblclick", function (e) {
         // Prevent click from triggering immediately during drag operations
         if (!this.isDragging) {
-            // Create window with the icon's name as title
+            // Get the label for the window title
+            const label = this.querySelector('.drag-element-text p').textContent;
+
+            // Create/open window with the icon's name as title
             createWindow(label, `This is the ${label} application window`);
         }
         // Reset the dragging flag
@@ -210,7 +213,25 @@ setTimeout(() => {
     const firstWindow = createWindow("Welcome", "This is a playground and ode to my childhood that was all anime and computer games. Its a forever work in progress. Since the internet is bland and ripped off its individuality, lets bring back the personal spirit of the old days! Feel free to stroll and frollock and if you fancy leave me a message. credits to: Kawaii Lineal color from freepik.com for the icons and Sound Effect by https://pixabay.com/users/u_fy1kpv89mt-49425146/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=31629>u_fy1kpv89mt://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=316298", '#8d95e7', 300, 500);
 }, 1000);
 
-function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300) {
+
+setTimeout(() => {
+    klick.play();
+    const secondWindow = createWindow("Graph", "", '#8d95e7', 800, 600, "graph_page.html");
+}, 3000);
+
+function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300, url = null) {
+    const existingWindow = windows.find(w => w.title === title);
+    if (existingWindow) {
+        // If window exists but is minimized, restore it
+        if (existingWindow.minimized) {
+            restoreWindow(existingWindow.element);
+        }
+        // Set it as active window (bring to front)
+        setActiveWindow(existingWindow.element);
+        return existingWindow.element;
+    }
+
+    // If no existing window, continue with creating a new one
     const windowId = 'window-' + Date.now();
     const window = document.createElement('div');
     window.className = 'window';
@@ -259,11 +280,20 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
     const windowContent = document.createElement('div');
     windowContent.className = 'window-content';
 
-    if (typeof content === 'string') {
+        if (url) {
+        // Create an iframe to display the external content
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none'; // Remove iframe border
+        windowContent.appendChild(iframe);
+    } else if (typeof content === 'string') {
         windowContent.innerHTML = content;
     } else {
         windowContent.appendChild(content);
     }
+
 
     // Create resize handle
     const resizeHandle = document.createElement('div');
@@ -360,19 +390,50 @@ function minimizeWindow(windowElement) {
         windowObj.maximized = false;
         windowElement.classList.add('minimized');
         windowElement.classList.remove('maximized');
+
+        // Actually hide the window
+        windowElement.style.display = 'none';
+
+        // Highlight the taskbar item to show it's minimized
+        const taskbarItem = document.querySelector(`.taskbar-item[data-window="${windowElement.id}"]`);
+        if (taskbarItem) {
+            taskbarItem.classList.add('minimized');
+        }
     }
 }
-
 // Maximize window
 function maximizeWindow(windowElement) {
     const windowObj = windows.find(w => w.id === windowElement.id);
     if (windowObj) {
         if (windowObj.maximized) {
-            // Restore to original size
+            // Restore to original size and position
             windowObj.maximized = false;
             windowElement.classList.remove('maximized');
+            // Restore original dimensions if they were saved
+            if (windowObj.originalDimensions) {
+                windowElement.style.width = windowObj.originalDimensions.width;
+                windowElement.style.height = windowObj.originalDimensions.height;
+                windowElement.style.top = windowObj.originalDimensions.top;
+                windowElement.style.left = windowObj.originalDimensions.left;
+            }
         } else {
-            // Maximize
+            // Save current dimensions before maximizing
+            windowObj.originalDimensions = {
+                width: windowElement.style.width,
+                height: windowElement.style.height,
+                top: windowElement.style.top,
+                left: windowElement.style.left
+            };
+
+            // Maximize - calculate available space
+            const taskbarHeight = document.getElementById('taskbar').offsetHeight;
+
+            // Set to fill available space minus taskbar
+            windowElement.style.width = '100%';
+            windowElement.style.height = `calc(100vh - ${taskbarHeight}px)`;
+            windowElement.style.top = '0';
+            windowElement.style.left = '0';
+
             windowObj.minimized = false;
             windowObj.maximized = true;
             windowElement.classList.remove('minimized');
@@ -380,13 +441,22 @@ function maximizeWindow(windowElement) {
         }
     }
 }
-
 // Restore window from minimized state
 function restoreWindow(windowElement) {
     const windowObj = windows.find(w => w.id === windowElement.id);
     if (windowObj) {
         windowObj.minimized = false;
         windowElement.classList.remove('minimized');
+
+        // Make window visible again
+        windowElement.style.display = 'block';
+
+        // Remove highlight from taskbar item
+        const taskbarItem = document.querySelector(`.taskbar-item[data-window="${windowElement.id}"]`);
+        if (taskbarItem) {
+            taskbarItem.classList.remove('minimized');
+        }
+
         setActiveWindow(windowElement);
     }
 }

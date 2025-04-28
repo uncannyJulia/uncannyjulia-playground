@@ -1,0 +1,114 @@
+/* Main layout styles */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+#chartId {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Control panel */
+.controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 100;
+}
+
+.controls button {
+    margin: 5px;
+    padding: 5px 10px;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.controls button:hover {
+    background: #555;
+}
+
+/* Node styles */
+.node text {
+    font-size: 12px;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.node path {
+    transition: stroke 0.3s, stroke-width 0.3s, fill 0.3s;
+    cursor: pointer;
+}
+
+.selected-node path {
+    stroke: #ff9900 !important;
+    stroke-width: 3px !important;
+}
+
+.fixed-node path {
+    stroke-dasharray: none;
+}
+
+/* Expand/Collapse icon styles */
+.expand-icon, .collapse-icon {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.expand-icon:hover, .collapse-icon:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Enhanced text containers */
+.text-container {
+    transition: opacity 0.3s;
+}
+
+.text-container rect {
+    opacity: 0.8;
+}
+
+/* Link styles */
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+    stroke-width: 1.5;
+    transition: stroke-opacity 0.3s;
+}
+
+.link.perspective,
+.link.philosophy,
+.link.thinking {
+    stroke-dasharray: 5,5;
+}
+
+/* Animation for new nodes/links */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.nodes g.node {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Animation for zoom transitions */
+.zoom-transition {
+    transition: transform 0.5s ease;
+}
+
+/* Import side panel styles */
+@import url('./modules/side-panel.css');
