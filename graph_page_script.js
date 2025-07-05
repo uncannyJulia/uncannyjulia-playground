@@ -1,15 +1,10 @@
-// Import D3 modules using ES Module syntax
-import * as d3 from 'd3';
-
-// Import custom modules
-import { nodeShapes, applyNodeStyles } from './modules/shapes.js';
-import { addTextToNodes, updateTextVisibility } from './modules/textUtils.js';
-import { GraphExplorer } from './modules/graphExplorer.js';
-import { SidePanel } from './modules/sidePanel.js';
+// D3 is loaded via importmap in HTML
+// Custom modules are loaded as regular scripts
 
 // Main app initialization
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('D3 is loaded and working');
+  console.log('DOM Content Loaded - D3 is loaded and working');
+  console.log('D3 version:', d3.version);
 
   // Force background color
   document.body.style.backgroundColor = "#000";
@@ -93,12 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let links;
   let graphExplorer;
 
-  // Load external JSON data
-  const loadData = async () => {
-    try {
-      const response = await fetch('graph_data.json');
-      const graphData = await response.json();
-      console.log('Data loaded successfully', graphData);
+  // Use embedded data (no fetch needed to avoid CORS issues)
+  const loadData = () => {
+    console.log('Loading embedded graph data...');
+    const graphData = GRAPH_DATA;
+    console.log('Data loaded successfully', graphData);
+    console.log('Number of nodes:', graphData.nodes.length);
+    console.log('Number of links:', graphData.links.length);
 
       // Initialize graph explorer with life events as starting nodes
       graphExplorer = new GraphExplorer(graphData);
@@ -112,17 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // Create initial graph
-      initializeGraph(graphExplorer.getVisibleGraph());
+      const initialGraph = graphExplorer.getVisibleGraph();
+      console.log('About to initialize graph with:', initialGraph);
+      initializeGraph(initialGraph);
 
       // Initial stats update
       updateSidePanelStats(graphExplorer, graphExplorer.getVisibleGraph());
-    } catch (error) {
-      console.error('Error loading data:', error);
-      console.log('Failed to load data, check if graph_data.json exists');
-
-      // Alert the user
-      alert('Failed to load graph data. Check console for details.');
-    }
   };
 
   // Function to update the side panel stats
@@ -163,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Main function to build the graph
   function initializeGraph(graphData) {
     console.log('Initializing graph with data:', graphData);
+    console.log('Graph data nodes:', graphData.nodes.length);
+    console.log('Graph data links:', graphData.links.length);
 
     // Initialize node positions before starting the simulation
     initializeNodePositions(graphData);
@@ -190,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .attr('marker-end', 'url(#arrow)');
 
     // Create a group for each node
+    console.log('Creating node groups for nodes:', graphData.nodes);
     nodeGroup = nodesGroup.selectAll('g.node')
       .data(graphData.nodes)
       .enter()
@@ -199,6 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .on('start', dragStarted)
         .on('drag', dragging)
         .on('end', dragEnded));
+    
+    console.log('Node groups created:', nodeGroup.size());
 
     // Create shapes based on node type
     nodeGroup.append('path')
@@ -274,38 +270,48 @@ document.addEventListener('DOMContentLoaded', () => {
         .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
     });
 
-    // Add click handler for node expansion/collapse and selection
+    // Add click handler for node selection and details
     nodeGroup.on('click', (event, d) => {
-      event.stopPropagation();
+      try {
+        event.stopPropagation();
 
-      // Clear previous selection
-      d3.selectAll('.selected-node').classed('selected-node', false);
+        // Clear previous selection
+        d3.selectAll('.selected-node').classed('selected-node', false);
 
-      // Mark this node as selected
-      d3.select(event.currentTarget).classed('selected-node', true);
+        // Mark this node as selected
+        d3.select(event.currentTarget).classed('selected-node', true);
 
-      // Toggle node connections
-      if (graphExplorer.hasUnexploredConnections(d.id)) {
-        const result = graphExplorer.toggleNode(d.id);
-
-        // Zoom to this node when expanding
-        if (result.expanded && result.changed) {
-          // Gentle zoom to the node
-          zoomToNode(d, 1.5);
+        // Show node details in side panel
+        if (sidePanel && sidePanel.showNode) {
+          sidePanel.showNode(d);
+        } else {
+          console.error('Side panel not available');
         }
+
+        // Also toggle node connections if it has unexplored connections
+        if (graphExplorer && graphExplorer.hasUnexploredConnections(d.id)) {
+          const result = graphExplorer.toggleNode(d.id);
+          // Note: removed auto-zoom on expansion since we want that for double-click
+        }
+      } catch (error) {
+        console.error('Error in node click handler:', error);
       }
     });
 
-    // Double-click to show node details in side panel
+    // Double-click to zoom to node
     nodeGroup.on('dblclick', (event, d) => {
-      event.stopPropagation();
-      event.preventDefault(); // Prevent default double-click behavior
+      try {
+        event.stopPropagation();
+        event.preventDefault(); // Prevent default double-click behavior
 
-      // Show node details in side panel
-      sidePanel.showNode(d);
+        // Zoom to this node
+        zoomToNode(d, 2.0);
 
-      // Return false to prevent other handlers
-      return false;
+        // Return false to prevent other handlers
+        return false;
+      } catch (error) {
+        console.error('Error in node double-click handler:', error);
+      }
     });
 
     // Double-click on background to reset zoom
@@ -322,15 +328,38 @@ document.addEventListener('DOMContentLoaded', () => {
       d3.selectAll('.selected-node').classed('selected-node', false);
     });
 
-    // Connect button events
-    document.getElementById('resetZoom').addEventListener('click', () => {
-      svg.transition().duration(750)
-        .call(zoom.transform, d3.zoomIdentity);
-    });
+    // Connect button events (now in side panel) - using setTimeout to ensure elements exist
+    setTimeout(() => {
+      const resetZoomBtn = document.getElementById('resetZoom');
+      const showAllBtn = document.getElementById('showAll');
+      const resetViewBtn = document.getElementById('resetView');
+      
+      if (resetZoomBtn) {
+        resetZoomBtn.addEventListener('click', () => {
+          svg.transition().duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
+        });
+      } else {
+        console.error('Reset Zoom button not found');
+      }
 
-    document.getElementById('showAll').addEventListener('click', () => {
-      graphExplorer.showFullGraph();
-    });
+      if (showAllBtn) {
+        showAllBtn.addEventListener('click', () => {
+          graphExplorer.showFullGraph();
+        });
+      } else {
+        console.error('Show All button not found');
+      }
+
+      if (resetViewBtn) {
+        resetViewBtn.addEventListener('click', () => {
+          // Reset to initial state with only life events
+          graphExplorer.resetToInitialState();
+        });
+      } else {
+        console.error('Reset View button not found');
+      }
+    }, 100); // Small delay to ensure side panel is created
   }
 
   // Function to update the graph when nodes are expanded/collapsed
@@ -428,24 +457,23 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mark this node as selected
       d3.select(event.currentTarget).classed('selected-node', true);
 
-      // Toggle node connections
+      // Show node details in side panel
+      sidePanel.showNode(d);
+
+      // Also toggle node connections if it has unexplored connections
       if (graphExplorer.hasUnexploredConnections(d.id)) {
         const result = graphExplorer.toggleNode(d.id);
-
-        // Zoom to this node when expanding
-        if (result.expanded && result.changed) {
-          zoomToNode(d, 1.5);
-        }
+        // Note: removed auto-zoom on expansion since we want that for double-click
       }
     })
     .on('dblclick', (event, d) => {
       event.stopPropagation();
       event.preventDefault(); // Prevent default double-click behavior
 
-      // Show node details in side panel
-      sidePanel.showNode(d);
+      // Zoom to this node
+      zoomToNode(d, 2.0);
 
-      // Return false to prevent zoom
+      // Return false to prevent other handlers
       return false;
     });
 

@@ -1,11 +1,9 @@
-import * as d3 from 'd3';
-
 /**
  * Creates and adds properly formatted and positioned text to nodes
  * @param {Selection} nodeGroup - D3 selection of node groups
  * @param {number} radius - Base radius of the node
  */
-export function addTextToNodes(nodeGroup, radius) {
+function addTextToNodes(nodeGroup, radius) {
   nodeGroup.each(function(d) {
     const node = d3.select(this);
     const text = d.text;
@@ -107,7 +105,7 @@ function addFormattedText(container, text, width) {
  * @param {Selection} nodeGroup - D3 selection of node groups
  * @param {number} scale - Current zoom scale
  */
-export function updateTextVisibility(nodeGroup, scale) {
+function updateTextVisibility(nodeGroup, scale) {
   nodeGroup.selectAll('.text-container')
     .style('visibility', scale < 0.6 ? 'hidden' : 'visible')
     .style('opacity', Math.min(scale, 1));

@@ -1,13 +1,10 @@
-// Import D3 for any dependencies
-import * as d3 from 'd3';
-
 /**
  * Generates points for a regular polygon
  * @param {number} sides - Number of sides
  * @param {number} radius - Radius of the polygon
  * @returns {Array} Array of [x,y] point coordinates
  */
-export function regularPolygon(sides, radius) {
+function regularPolygon(sides, radius) {
   const points = [];
   const angleStep = (Math.PI * 2) / sides;
   const startAngle = -Math.PI / 2; // Start at the top
@@ -28,14 +25,14 @@ export function regularPolygon(sides, radius) {
  * @param {Array} points - Array of [x,y] coordinates
  * @returns {string} SVG path data string
  */
-export function pointsToPath(points) {
+function pointsToPath(points) {
   return `M${points.map(p => p.join(',')).join('L')}Z`;
 }
 
 /**
  * Node shape definitions with custom border styles
  */
-export const nodeShapes = {
+const nodeShapes = {
   // Hexagon for interests with double stroke
   'interest': (radius) => ({
     path: pointsToPath(regularPolygon(6, radius * 0.3)),
@@ -62,7 +59,7 @@ export const nodeShapes = {
  * Applies the appropriate stroke style to a node element
  * @param {Selection} selection - D3 selection of node elements
  */
-export function applyNodeStyles(selection) {
+function applyNodeStyles(selection) {
   selection.each(function(d) {
     const node = d3.select(this);
     const path = node.select('path');

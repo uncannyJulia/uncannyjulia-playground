@@ -1,10 +1,8 @@
-import * as d3 from 'd3';
-
 /**
  * Manages the progressive disclosure of nodes in the graph
  * Shows life event nodes initially, then reveals/hides connected nodes on click
  */
-export class GraphExplorer {
+class GraphExplorer {
   constructor(fullGraphData) {
     this.fullData = JSON.parse(JSON.stringify(fullGraphData)); // Deep copy
     this.visibleNodeIds = new Set();
@@ -28,14 +26,19 @@ export class GraphExplorer {
       links: []
     };
 
-    // Find life event nodes to show initially
-    const lifeEventNodes = this.fullData.nodes.filter(node => node.type === 'skill');
+    // Find life event nodes to show initially (showing only a few key ones)
+    const keyLifeEvents = ["3", "19", "31", "44", "52", "55"]; // Key milestone IDs
+    const lifeEventNodes = this.fullData.nodes.filter(node => 
+      node.type === 'life event' && keyLifeEvents.includes(node.id));
+    console.log('Key life event nodes found:', lifeEventNodes.length, lifeEventNodes);
 
     // Add life event nodes to visible set
     lifeEventNodes.forEach(node => {
       this.visibleNodeIds.add(node.id);
       visibleGraph.nodes.push(node);
     });
+
+    console.log('Initial visible graph:', visibleGraph);
 
     // Add links between visible nodes
     this.fullData.links.forEach(link => {
@@ -280,5 +283,23 @@ export class GraphExplorer {
    */
   isNodeExpanded(nodeId) {
     return this.expandedNodeIds.has(nodeId);
+  }
+
+  /**
+   * Reset to initial state with only life events visible
+   */
+  resetToInitialState() {
+    // Clear all expanded states
+    this.expandedNodeIds.clear();
+    this.hiddenConnectionsMap.clear();
+    this.visibleNodeIds.clear();
+
+    // Recreate initial graph
+    this.visibleData = this.createInitialGraph();
+
+    // Notify of graph change
+    if (this.onGraphChange) {
+      this.onGraphChange(this.visibleData, [], []);
+    }
   }
 }

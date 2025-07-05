@@ -1,6 +1,9 @@
 // loading and declaring variables
-const icons = ["kitty.png", "dog.png", "bunny.png", "about.png", "contact.png", "folder.png"]; // Replace with your actual icons
-const klick = new Audio('klick.mp3');
+const icons = ["icons/kitty.png", "icons/dog.png", "icons/bunny.png", "icons/about.png", "icons/contact.png", "icons/folder.png"]; // Replace with your actual icons
+const klick = new Audio('icons/klick.mp3');
+
+// Initialize markdown parser
+const markdownParser = new MarkdownParser();
 
 const date = new Date()
 const options = {
@@ -79,8 +82,9 @@ function createDraggableElement(iconName, index) {
 
     // Create text content
     const textContent = document.createElement("p");
-    // Extract name without extension for the label
-    const label = iconName.split('.')[0];
+    // Extract name without extension and folder path for the label
+    const fileName = iconName.split('/').pop(); // Remove folder path
+    const label = fileName.split('.')[0]; // Remove file extension
     textContent.textContent = label;
 
     // Assemble the elements
@@ -102,7 +106,13 @@ function createDraggableElement(iconName, index) {
             const label = this.querySelector('.drag-element-text p').textContent;
 
             // Create/open window with the icon's name as title
-            createWindow(label, `This is the ${label} application window`);
+            if (label === 'about') {
+                createWindow('About', '', '#8d95e7', 600, 500, null, false, 'content/vita.md');
+            } else if (label === 'contact') {
+                createContactWindow();
+            } else {
+                createWindow(label, `This is the ${label} application window`);
+            }
         }
         // Reset the dragging flag
         this.isDragging = false;
@@ -187,7 +197,13 @@ function makeDraggable(element) {
                 if (element.lastTapTime && (touchEndTime - element.lastTapTime) < 300) {
                     // Double-tap detected - open window
                     const label = element.querySelector('.drag-element-text p').textContent;
-                    createWindow(label, `This is the ${label} application window`);
+                    if (label === 'about') {
+                        createWindow('About', '', '#8d95e7', 600, 500, null, false, 'content/vita.md');
+                    } else if (label === 'contact') {
+                        createContactWindow();
+                    } else {
+                        createWindow(label, `This is the ${label} application window`);
+                    }
                 }
 
                 // Store the last tap time for double-tap detection
@@ -209,17 +225,40 @@ icons.forEach((icon, index) => {
 
 // make a sound when the page loads with the first message
 setTimeout(() => {
-    klick.play();
-    const firstWindow = createWindow("Welcome", "This is a playground and ode to my childhood that was all anime and computer games. Its a forever work in progress. Since the internet is bland and ripped off its individuality, lets bring back the personal spirit of the old days! Feel free to stroll and frollock and if you fancy leave me a message. credits to: Kawaii Lineal color from freepik.com for the icons and Sound Effect by https://pixabay.com/users/u_fy1kpv89mt-49425146/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=31629>u_fy1kpv89mt://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=316298", '#8d95e7', 300, 500);
+    klick.play().catch(e => console.log('Audio autoplay blocked:', e));
+    const welcomeContent = `# Welcome to UncannyJulia Playground! 🎮
+
+This is a playground and ode to my childhood filled with anime and computer games. It's a forever work in progress!
+
+Since the internet has become bland and stripped of its individuality, let's bring back the personal spirit of the old days! 
+
+**Feel free to stroll and frolic around** - click the icons to explore different aspects of my journey. If you fancy, leave me a message!
+
+---
+
+## What You'll Find Here
+- **Interactive Graph**: Explore my life journey through an interactive visualization
+- **About Me**: Learn about my professional background
+- **Contact**: Get in touch if you'd like to connect
+
+---
+
+## Attributions
+- **Icons**: Kawaii Lineal color from freepik.com
+- **Sound Effects**: 
+  - [FoxBoyTails](https://pixabay.com/users/foxboytails-49447089/) from Pixabay
+  - [freesound_community](https://pixabay.com/users/freesound_community-46691455/) from Pixabay`;
+
+    const firstWindow = createWindow("Welcome", welcomeContent, '#8d95e7', 400, 600, null, true);
 }, 1000);
 
 
 setTimeout(() => {
-    klick.play();
+    klick.play().catch(e => console.log('Audio autoplay blocked:', e));
     const secondWindow = createWindow("Graph", "", '#8d95e7', 800, 600, "graph_page.html");
 }, 3000);
 
-function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300, url = null) {
+function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300, url = null, isMarkdown = false, markdownFile = null) {
     const existingWindow = windows.find(w => w.title === title);
     if (existingWindow) {
         // If window exists but is minimized, restore it
@@ -280,7 +319,7 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
     const windowContent = document.createElement('div');
     windowContent.className = 'window-content';
 
-        if (url) {
+    if (url) {
         // Create an iframe to display the external content
         const iframe = document.createElement('iframe');
         iframe.src = url;
@@ -288,6 +327,22 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
         iframe.style.height = '100%';
         iframe.style.border = 'none'; // Remove iframe border
         windowContent.appendChild(iframe);
+    } else if (markdownFile) {
+        // Load markdown file and parse it
+        windowContent.innerHTML = '<p>Loading...</p>';
+        windowContent.classList.add('markdown-content');
+        
+        markdownParser.parseFile(markdownFile).then(htmlContent => {
+            windowContent.innerHTML = htmlContent;
+        }).catch(error => {
+            console.error('Error loading markdown file:', error);
+            windowContent.innerHTML = '<p>Error loading markdown file</p>';
+        });
+    } else if (isMarkdown && typeof content === 'string') {
+        // Parse markdown content
+        const htmlContent = markdownParser.parse(content);
+        windowContent.innerHTML = htmlContent;
+        windowContent.classList.add('markdown-content');
     } else if (typeof content === 'string') {
         windowContent.innerHTML = content;
     } else {
@@ -666,4 +721,214 @@ function setupWindowTouchEvents(windowElement) {
     windowElement.addEventListener('touchstart', () => {
         setActiveWindow(windowElement);
     });
+}
+
+// Create contact window with social media links and email composer
+function createContactWindow() {
+    const contactContent = `# Get in Touch! 📫
+
+I don't have social media accounts, but you can find me on these professional platforms:
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0;">
+    <div style="text-align: center;">
+        <a href="https://github.com/uncannyjulia" target="_blank" style="text-decoration: none; color: inherit;">
+            <img src="icons/github.png" alt="GitHub" style="width: 48px; height: 48px; margin-bottom: 8px;">
+            <div>GitHub</div>
+        </a>
+    </div>
+    <div style="text-align: center;">
+        <a href="https://www.researchgate.net/profile/Julia-Thomas-24?ev=hdr_xprf" target="_blank" style="text-decoration: none; color: inherit;">
+            <img src="icons/research.png" alt="ResearchGate" style="width: 48px; height: 48px; margin-bottom: 8px;">
+            <div>ResearchGate</div>
+        </a>
+    </div>
+    <div style="text-align: center;">
+        <a href="https://www.linkedin.com/in/julia-thomas-a5ba27214/" target="_blank" style="text-decoration: none; color: inherit;">
+            <img src="icons/linkedin.png" alt="LinkedIn" style="width: 48px; height: 48px; margin-bottom: 8px;">
+            <div>LinkedIn</div>
+        </a>
+    </div>
+</div>
+
+---
+
+## Send Me a Message ✉️
+
+Want to get in touch? Click the email icon below to compose a message!
+
+<div style="text-align: center; margin: 20px 0;">
+    <div style="cursor: pointer; display: inline-block;" onclick="openEmailComposer()">
+        <img src="icons/email.png" alt="Email" style="width: 48px; height: 48px; margin-bottom: 8px;">
+        <div>Send Email</div>
+    </div>
+</div>
+
+---
+
+*Feel free to reach out about collaborations, research opportunities, or just to say hi!*`;
+
+    createWindow('Contact', contactContent, '#e78db5', 450, 500, null, true);
+}
+
+// Create email composer window
+function openEmailComposer() {
+    const emailContent = document.createElement('div');
+    emailContent.style.padding = '20px';
+    emailContent.innerHTML = `
+        <h2 style="margin-top: 0; color: #333;">✉️ Send Email to Julia</h2>
+        <div id="emailStatus" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+        <form id="emailForm" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label for="senderName" style="display: block; margin-bottom: 5px; font-weight: bold;">Your Name:</label>
+                <input type="text" id="senderName" name="senderName" required 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div>
+                <label for="senderEmail" style="display: block; margin-bottom: 5px; font-weight: bold;">Your Email:</label>
+                <input type="email" id="senderEmail" name="senderEmail" required 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                <div id="emailError" style="color: #d32f2f; font-size: 12px; margin-top: 5px; display: none;">
+                    Please enter a valid email address
+                </div>
+            </div>
+            <div>
+                <label for="subject" style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
+                <input type="text" id="subject" name="subject" required 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div>
+                <label for="message" style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
+                <textarea id="message" name="message" required rows="6" 
+                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeEmailComposer()" 
+                        style="padding: 10px 20px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 4px; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" id="sendButton"
+                        style="padding: 10px 20px; border: none; background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
+                    Send Email
+                </button>
+            </div>
+        </form>
+        <div style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px; font-size: 12px; color: #666;">
+            <strong>Note:</strong> This form uses EmailJS to send emails directly from the browser. Setup required: create EmailJS account and configure service/template IDs.
+        </div>
+    `;
+
+    const emailWindow = createWindow('Email Composer', emailContent, '#4CAF50', 420, 580);
+    
+    // Add form submission handler
+    const form = emailContent.querySelector('#emailForm');
+    const statusDiv = emailContent.querySelector('#emailStatus');
+    const emailError = emailContent.querySelector('#emailError');
+    const sendButton = emailContent.querySelector('#sendButton');
+    const emailInput = emailContent.querySelector('#senderEmail');
+    
+    // Email validation
+    emailInput.addEventListener('input', function() {
+        const email = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            emailError.style.display = 'block';
+            this.style.borderColor = '#d32f2f';
+        } else {
+            emailError.style.display = 'none';
+            this.style.borderColor = '#ddd';
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const name = formData.get('senderName');
+        const email = formData.get('senderEmail');
+        const subject = formData.get('subject');
+        const message = formData.get('message');
+        
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showStatus('Please enter a valid email address', 'error');
+            return;
+        }
+        
+        // Show loading state
+        sendButton.disabled = true;
+        sendButton.textContent = 'Sending...';
+        sendButton.style.background = '#ccc';
+        
+        // Send email using EmailJS
+        sendEmailViaEmailJS(name, email, subject, message)
+            .then(response => {
+                if (response.ok) {
+                    showStatus('Email sent successfully! Thank you for your message.', 'success');
+                    form.reset();
+                    setTimeout(() => {
+                        closeEmailComposer();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to send email');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending email:', error);
+                showStatus('Sorry, there was an error sending your email. Please try again or contact julia@xemantic.com directly.', 'error');
+            })
+            .finally(() => {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send Email';
+                sendButton.style.background = '#4CAF50';
+            });
+    });
+    
+    function showStatus(message, type) {
+        statusDiv.textContent = message;
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+        statusDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+        statusDiv.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+    }
+}
+
+// Function to send email via EmailJS
+async function sendEmailViaEmailJS(name, email, subject, message) {
+    // EmailJS configuration - replace with your actual values
+    const serviceID = 'YOUR_SERVICE_ID'; // e.g., 'service_abc123'
+    const templateID = 'YOUR_TEMPLATE_ID'; // e.g., 'template_xyz789'
+    const publicKey = 'YOUR_PUBLIC_KEY'; // e.g., 'user_abcdef123456'
+    
+    const templateParams = {
+        from_name: name,
+        from_email: email,
+        subject: subject,
+        message: message,
+        to_email: 'julia@xemantic.com'
+    };
+    
+    try {
+        // Initialize EmailJS if not already done
+        if (typeof emailjs === 'undefined') {
+            throw new Error('EmailJS library not loaded');
+        }
+        
+        // Send email
+        const response = await emailjs.send(serviceID, templateID, templateParams, publicKey);
+        
+        return { ok: true, response };
+    } catch (error) {
+        console.error('Error sending email via EmailJS:', error);
+        throw error;
+    }
+}
+
+// Close email composer window
+function closeEmailComposer() {
+    const emailWindow = windows.find(w => w.title === 'Email Composer');
+    if (emailWindow) {
+        closeWindow(emailWindow.element);
+    }
 }

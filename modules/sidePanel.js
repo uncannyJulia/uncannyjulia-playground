@@ -2,7 +2,7 @@
  * Creates and manages a permanent side panel for displaying node details
  * Always visible and shows debug info
  */
-export class SidePanel {
+class SidePanel {
   constructor() {
     this.panel = null;
     this.contentArea = null;
@@ -19,8 +19,8 @@ export class SidePanel {
     // Create the panel element
     this.createPanel();
 
-    // Show initial debug content
-    this.showDebugInfo();
+    // Initialize debug content but don't change title
+    this.updateDebugSection();
 
     console.log('Permanent side panel initialized');
   }
@@ -41,7 +41,7 @@ export class SidePanel {
     // Title area
     this.titleElement = document.createElement('h2');
     this.titleElement.className = 'panel-title';
-    this.titleElement.textContent = 'Graph Explorer';
+    this.titleElement.textContent = 'Graph of Life';
     header.appendChild(this.titleElement);
 
     this.panel.appendChild(header);
@@ -50,19 +50,46 @@ export class SidePanel {
     this.contentArea = document.createElement('div');
     this.contentArea.className = 'panel-content';
 
-    // Add initial placeholder
+    // Add controls and instructions
     this.contentArea.innerHTML = `
+      <div class="controls-section">
+        <button id="resetZoom" class="control-btn">Reset Zoom</button>
+        <button id="showAll" class="control-btn">Show All Nodes</button>
+        <button id="resetView" class="control-btn">Reset to Life Events</button>
+      </div>
+      
+      <div class="manual-section">
+        <p><strong>Click:</strong> Show details & expand connections</p>
+        <p><strong>Double-click:</strong> Zoom to node</p>
+        <p><strong>Shift+Drag:</strong> Fix node position</p>
+        <p><strong>Mouse wheel:</strong> Zoom in/out</p>
+        <p><strong>Drag background:</strong> Pan around</p>
+      </div>
+      
       <div class="info-section">
-        <p>Double-click any node to view its details here.</p>
+        <p class="node-placeholder">Click any node to view its details here.</p>
+      </div>
+      
+      <div class="extra-section">
+        <div class="orange-separator"></div>
+        <div class="extra-content">
+          <p class="extra-placeholder">Additional information will appear here when available.</p>
+        </div>
       </div>
     `;
 
     this.panel.appendChild(this.contentArea);
 
-    // Add debug section
+    // Add debug section (initially hidden)
     this.debugSection = document.createElement('div');
     this.debugSection.className = 'debug-section';
-    this.debugSection.innerHTML = '<h3>Debug Information</h3><div id="debug-content"></div>';
+    this.debugSection.style.display = 'none';
+    this.debugSection.innerHTML = `
+      <h3>Properties</h3>
+      <div id="node-properties"></div>
+      <h4>Graph Stats</h4>
+      <ul class="debug-list" id="debug-stats"></ul>
+    `;
     this.contentArea.appendChild(this.debugSection);
 
     // Add to document
@@ -81,54 +108,48 @@ export class SidePanel {
     console.log('Showing node details:', node);
     this.currentNodeId = node.id;
 
-    // Update title
-    this.titleElement.textContent = node.text;
+    // Keep title as "Graph of Life" - don't change it
 
-    // Clear previous content (except debug section)
-    this.contentArea.innerHTML = '';
+    // Update only the node details section
+    const infoSection = this.contentArea.querySelector('.info-section');
+    console.log('Info section found:', infoSection);
+    if (!infoSection) return;
+    
+    // Clear the info section - no longer showing node text here
+    infoSection.innerHTML = '<p class="node-placeholder">Node selected - details shown below</p>';
+    console.log('Info section cleared, node details moved to properties');
 
-    // Create basic info section
-    const infoSection = document.createElement('div');
-    infoSection.className = 'info-section';
-
-    // Type badge
-    const typeBadge = document.createElement('span');
-    typeBadge.className = `type-badge ${node.type.replace(/\s+/g, '-')}`;
-    typeBadge.textContent = node.type;
-    infoSection.appendChild(typeBadge);
-
-    // Node ID
-    const idElement = document.createElement('div');
-    idElement.className = 'node-id';
-    idElement.textContent = `ID: ${node.id}`;
-    infoSection.appendChild(idElement);
-
-    this.contentArea.appendChild(infoSection);
-
-    // Add details section (placeholder for future content)
-    const detailsSection = document.createElement('div');
-    detailsSection.className = 'details-section';
-
-    // Check if we have existing details for this node
-    if (this.detailsData[node.id]) {
-      detailsSection.innerHTML = this.detailsData[node.id];
+    // Update extra section with node type and additional info
+    const extraContent = this.contentArea.querySelector('.extra-content');
+    console.log('Extra content found:', extraContent);
+    if (extraContent) {
+      extraContent.innerHTML = `
+        <div class="node-title-section">
+          <h4 style="color: #ff9900; margin: 0 0 10px 0; font-size: 16px;">${node.text}</h4>
+        </div>
+        <p><strong>Type:</strong> ${node.type}</p>
+        <p><strong>Node ID:</strong> ${node.id}</p>
+        <p style="margin-top: 10px; font-size: 11px; color: #888;">
+          This node represents a ${node.type.toLowerCase()} in the life journey graph.
+        </p>
+      `;
+      console.log('Extra content updated with node title');
     } else {
-      // Placeholder message
-      detailsSection.innerHTML = `
-        <p class="placeholder-text">
-          Additional details for "${node.text}" can be added here.
-        </p>
-        <p class="placeholder-text">
-          Properties:
-        </p>
+      console.log('Extra content section not found!');
+    }
+
+    // Update debug section with node properties
+    const nodeProperties = document.getElementById('node-properties');
+    if (nodeProperties) {
+      nodeProperties.innerHTML = `
+        <p><strong>ID:</strong> ${node.id}</p>
+        <p><strong>Type:</strong> ${node.type}</p>
         <pre>${JSON.stringify(node, null, 2)}</pre>
       `;
     }
 
-    this.contentArea.appendChild(detailsSection);
-
-    // Add debug section back
-    this.updateDebugSection();
+    // Update the current node
+    this.currentNodeId = node.id;
   }
 
   /**
@@ -176,7 +197,7 @@ export class SidePanel {
    * Shows debug information in the panel
    */
   showDebugInfo() {
-    this.titleElement.textContent = 'Graph Explorer';
+    // Keep title as "Graph of Life" - don't change it
 
     // Create basic debug info
     this.updateDebugSection();
