@@ -8,34 +8,43 @@
     <!-- External CSS file -->
     <link rel="stylesheet" href="graph_page_styles.css">
 
-    <!-- Import Map Configuration -->
-    <script type="importmap">
-        {
-            "imports": {
-                "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm",
-                "d3-force": "https://cdn.jsdelivr.net/npm/d3-force@3/+esm",
-                "d3-selection": "https://cdn.jsdelivr.net/npm/d3-selection@3/+esm",
-                "d3-zoom": "https://cdn.jsdelivr.net/npm/d3-zoom@3/+esm",
-                "d3-drag": "https://cdn.jsdelivr.net/npm/d3-drag@3/+esm",
-                "d3-transition": "https://cdn.jsdelivr.net/npm/d3-transition@3/+esm"
-            }
+    <!-- Inline styles for critical rendering -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #000 !important;
+            color: #fff;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
-    </script>
+
+        #chartId {
+            width: 70%;
+            height: 100vh;
+            float: left;
+            background-color: #000 !important;
+        }
+
+        svg {
+            background-color: #000 !important;
+        }
+    </style>
+
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div id="chartId"></div>
 
-    <div class="controls">
-        <button id="resetZoom">Reset Zoom</button>
-        <button id="showAll">Show All Nodes</button>
-        <div style="margin-top: 10px; font-size: 12px;">
-            <p>Click a node: Expand connections</p>
-            <p>Shift+Drag: Fix node position</p>
-            <p>Double-click: Zoom to node</p>
-        </div>
-    </div>
 
-    <!-- Load app.js as a module -->
-    <script type="module" src="graph_page_script.js"></script>
+    <!-- Load graph data and modules -->
+    <script src="data/graphData.js"></script>
+    <script src="modules/shapes.js"></script>
+    <script src="modules/textUtils.js"></script>
+    <script src="modules/graphExplorer.js"></script>
+    <script src="modules/sidePanel.js"></script>
+    <script src="graph_page_script.js"></script>
 </body>
 </html>
