@@ -96,8 +96,9 @@ function createDraggableElement(iconName, index) {
     dragElement.appendChild(imageDiv);
     dragElement.appendChild(textDiv);
 
-    // Add to document
-    document.body.appendChild(dragElement);
+    // Add to icons container
+    const container = document.getElementById('icons-container') || document.body;
+    container.appendChild(dragElement);
 
     // Add drag functionality
     makeDraggable(dragElement);
@@ -242,28 +243,15 @@ icons.forEach((icon, index) => {
 // make a sound when the page loads with the first message
 setTimeout(() => {
     klick.play().catch(e => console.log('Audio autoplay blocked:', e));
-    const welcomeContent = `# Welcome to UncannyJulia Playground! 🎮
+    const welcomeContent = `Welcome to my little corner of the internet!
 
-This is a playground and ode to my childhood filled with anime and computer games. It's a forever work in progress!
+This is a playground and tribute to my childhood filled with anime and computer games. It's forever work in progress.
 
-Since the internet has become bland and stripped of its individuality, let's bring back the personal spirit of the old days! 
+The internet has become so bland and corporate - I miss the days when everyone had weird personal websites. So here's mine.
 
-**Feel free to stroll and frolic around** - click the icons to explore different aspects of my journey. If you fancy, leave me a message!
+Double-click the icons to explore. Check out the life graph, leave something in the guestbook, or just poke around.
 
----
-
-## What You'll Find Here
-- **Interactive Graph**: Explore my life journey through an interactive visualization
-- **About Me**: Learn about my professional background
-- **Contact**: Get in touch if you'd like to connect
-
----
-
-## Attributions
-- **Icons**: Kawaii Lineal color from freepik.com
-- **Sound Effects**: 
-  - [FoxBoyTails](https://pixabay.com/users/foxboytails-49447089/) from Pixabay
-  - [freesound_community](https://pixabay.com/users/freesound_community-46691455/) from Pixabay`;
+Icons are Kawaii Lineal color from freepik.com. Sounds from FoxBoyTails and freesound_community on Pixabay.`;
 
     const firstWindow = createWindow("Welcome", welcomeContent, '#8d95e7', 400, 600, null, true);
 }, 1000);
@@ -271,8 +259,12 @@ Since the internet has become bland and stripped of its individuality, let's bri
 
 setTimeout(() => {
     klick.play().catch(e => console.log('Audio autoplay blocked:', e));
-    const secondWindow = createWindow("Graph", "", '#8d95e7', 800, 600, "graph_page.html");
-}, 3000);
+    const graphWindow = createWindow("Graph", "", '#8d95e7', 800, 600, "graph_page.html");
+    // Position it to the right and move it behind Welcome
+    graphWindow.style.left = '350px';
+    graphWindow.style.top = '80px';
+    graphWindow.style.zIndex = zIndex - 5;
+}, 500);
 
 function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, initHeight = 300, url = null, isMarkdown = false, markdownFile = null) {
     const existingWindow = windows.find(w => w.title === title);
@@ -286,16 +278,30 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
         return existingWindow.element;
     }
 
+    // Check if mobile
+    const isMobile = window.innerWidth <= 768;
+
     // If no existing window, continue with creating a new one
     const windowId = 'window-' + Date.now();
-    const window = document.createElement('div');
-    window.className = 'window';
-    window.id = windowId;
-    window.style.zIndex = zIndex++;
-    window.style.top = (50 + Math.random() * 100) + 'px';
-    window.style.left = (50 + Math.random() * 100) + 'px';
-    window.style.width = `${initWidth}`+'px';
-    window.style.height = `${initHeight}`+'px';
+    const windowEl = document.createElement('div');
+    windowEl.className = 'window';
+    windowEl.id = windowId;
+    windowEl.style.zIndex = zIndex++;
+
+    if (isMobile) {
+        // On mobile: stack windows, full width
+        const windowCount = windows.length;
+        windowEl.style.top = (10 + windowCount * 50) + 'px';
+        windowEl.style.left = '10px';
+        windowEl.style.width = 'calc(100vw - 20px)';
+        windowEl.style.height = Math.min(initHeight, window.innerHeight * 0.6) + 'px';
+    } else {
+        // On desktop: random position
+        windowEl.style.top = (50 + Math.random() * 100) + 'px';
+        windowEl.style.left = (50 + Math.random() * 100) + 'px';
+        windowEl.style.width = `${initWidth}px`;
+        windowEl.style.height = `${initHeight}px`;
+    }
 
     // Create window header
     const header = document.createElement('div');
@@ -371,11 +377,11 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
     resizeHandle.className = 'window-resize-handle';
 
     // Assemble window
-    window.appendChild(header);
-    window.appendChild(windowContent);
-    window.appendChild(resizeHandle);
+    windowEl.appendChild(header);
+    windowEl.appendChild(windowContent);
+    windowEl.appendChild(resizeHandle);
 
-    document.body.appendChild(window);
+    document.body.appendChild(windowEl);
 
     // Add to taskbar
     addToTaskbar(windowId, title);
@@ -384,38 +390,38 @@ function createWindow(title, content, headerColor = '#8d95e7', initWidth = 400, 
     windows.push({
         id: windowId,
         title: title,
-        element: window,
+        element: windowEl,
         minimized: false,
         maximized: false
     });
 
     // Set as active window
-    setActiveWindow(window);
+    setActiveWindow(windowEl);
 
     // Set up event listeners
-    setupDragging(window, header);
-    setupResizing(window, resizeHandle);
+    setupDragging(windowEl, header);
+    setupResizing(windowEl, resizeHandle);
 
     // Control buttons events
     minimizeBtn.addEventListener('click', () => {
-        minimizeWindow(window);
+        minimizeWindow(windowEl);
     });
 
     maximizeBtn.addEventListener('click', () => {
-        maximizeWindow(window);
+        maximizeWindow(windowEl);
     });
 
     closeBtn.addEventListener('click', () => {
-        closeWindow(window);
+        closeWindow(windowEl);
     });
 
     // Click on window to bring to front
-    window.addEventListener('mousedown', () => {
-        setActiveWindow(window);
+    windowEl.addEventListener('mousedown', () => {
+        setActiveWindow(windowEl);
     });
 
-    setupWindowTouchEvents(window);
-    return window;
+    setupWindowTouchEvents(windowEl);
+    return windowEl;
 }
 
 // Add window to taskbar
@@ -741,11 +747,9 @@ function setupWindowTouchEvents(windowElement) {
 
 // Create contact window with social media links and email composer
 function createContactWindow() {
-    const contactContent = `# Get in Touch! 📫
+    const contactContent = `I'm not on social media, but you can find me here:
 
-I don't have social media accounts, but you can find me on these professional platforms:
-
-<div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0;">
+<div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 25px 0;">
     <div style="text-align: center;">
         <a href="https://github.com/uncannyjulia" target="_blank" style="text-decoration: none; color: inherit;">
             <img src="icons/github.png" alt="GitHub" style="width: 48px; height: 48px; margin-bottom: 8px;">
@@ -766,24 +770,16 @@ I don't have social media accounts, but you can find me on these professional pl
     </div>
 </div>
 
----
-
-## Send Me a Message ✉️
-
-Want to get in touch? Click the email icon below to compose a message!
+Or send me a message directly:
 
 <div style="text-align: center; margin: 20px 0;">
     <div style="cursor: pointer; display: inline-block;" onclick="openEmailComposer()">
         <img src="icons/email.png" alt="Email" style="width: 48px; height: 48px; margin-bottom: 8px;">
         <div>Send Email</div>
     </div>
-</div>
+</div>`;
 
----
-
-*Feel free to reach out about collaborations, research opportunities, or just to say hi!*`;
-
-    createWindow('Contact', contactContent, '#e78db5', 450, 500, null, true);
+    createWindow('Contact', contactContent, '#e78db5', 400, 400, null, true);
 }
 
 // Create email composer window
@@ -791,49 +787,45 @@ function openEmailComposer() {
     const emailContent = document.createElement('div');
     emailContent.style.padding = '20px';
     emailContent.innerHTML = `
-        <h2 style="margin-top: 0; color: #333;">✉️ Send Email to Julia</h2>
         <div id="emailStatus" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
         <form id="emailForm" style="display: flex; flex-direction: column; gap: 15px;">
             <div>
-                <label for="senderName" style="display: block; margin-bottom: 5px; font-weight: bold;">Your Name:</label>
-                <input type="text" id="senderName" name="senderName" required 
+                <label for="senderName" style="display: block; margin-bottom: 5px;">Name</label>
+                <input type="text" id="senderName" name="senderName" required
                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
             <div>
-                <label for="senderEmail" style="display: block; margin-bottom: 5px; font-weight: bold;">Your Email:</label>
-                <input type="email" id="senderEmail" name="senderEmail" required 
+                <label for="senderEmail" style="display: block; margin-bottom: 5px;">Email</label>
+                <input type="email" id="senderEmail" name="senderEmail" required
                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
                 <div id="emailError" style="color: #d32f2f; font-size: 12px; margin-top: 5px; display: none;">
-                    Please enter a valid email address
+                    Invalid email
                 </div>
             </div>
             <div>
-                <label for="subject" style="display: block; margin-bottom: 5px; font-weight: bold;">Subject:</label>
-                <input type="text" id="subject" name="subject" required 
+                <label for="subject" style="display: block; margin-bottom: 5px;">Subject</label>
+                <input type="text" id="subject" name="subject" required
                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
             <div>
-                <label for="message" style="display: block; margin-bottom: 5px; font-weight: bold;">Message:</label>
-                <textarea id="message" name="message" required rows="6" 
+                <label for="message" style="display: block; margin-bottom: 5px;">Message</label>
+                <textarea id="message" name="message" required rows="5"
                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical;"></textarea>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeEmailComposer()" 
+                <button type="button" onclick="closeEmailComposer()"
                         style="padding: 10px 20px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 4px; cursor: pointer;">
                     Cancel
                 </button>
                 <button type="submit" id="sendButton"
                         style="padding: 10px 20px; border: none; background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">
-                    Send Email
+                    Send
                 </button>
             </div>
         </form>
-        <div style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px; font-size: 12px; color: #666;">
-            <strong>Note:</strong> This form uses EmailJS to send emails directly from the browser. Setup required: create EmailJS account and configure service/template IDs.
-        </div>
     `;
 
-    const emailWindow = createWindow('Email Composer', emailContent, '#4CAF50', 420, 580);
+    const emailWindow = createWindow('Email', emailContent, '#4CAF50', 380, 450);
     
     // Add form submission handler
     const form = emailContent.querySelector('#emailForm');
@@ -943,7 +935,7 @@ async function sendEmailViaEmailJS(name, email, subject, message) {
 
 // Close email composer window
 function closeEmailComposer() {
-    const emailWindow = windows.find(w => w.title === 'Email Composer');
+    const emailWindow = windows.find(w => w.title === 'Email');
     if (emailWindow) {
         closeWindow(emailWindow.element);
     }
@@ -951,22 +943,16 @@ function closeEmailComposer() {
 
 // Create Kitty Gallery window with cat video
 function createKittyGalleryWindow() {
-    const kittyContent = `# Kitty Gallery 🐱
-
-Meet my beloved cat!
+    const kittyContent = `My cat:
 
 <div style="text-align: center; margin: 20px 0;">
     <video width="100%" controls style="max-width: 480px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
         <source src="content/MicrosoftTeams-video.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
-</div>
+</div>`;
 
----
-
-*More photos and videos coming soon!*`;
-
-    createWindow('Kitty Gallery', kittyContent, '#f5a6c9', 550, 500, null, true);
+    createWindow('Kitty', kittyContent, '#f5a6c9', 520, 420, null, true);
 }
 
 // Create Guestbook window
@@ -974,32 +960,30 @@ function createGuestbookWindow() {
     const guestbookContent = document.createElement('div');
     guestbookContent.style.padding = '15px';
     guestbookContent.innerHTML = `
-        <h2 style="margin-top: 0; color: #333; border-bottom: 2px solid #9b59b6; padding-bottom: 10px;">📖 Guestbook</h2>
-        <p style="color: #666; font-style: italic;">Leave your mark! Just like the good old days of the internet.</p>
+        <p style="color: #666; margin-top: 0;">Remember guestbooks? Leave a message.</p>
 
-        <div id="guestbookEntries" style="max-height: 200px; overflow-y: auto; margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+        <div id="guestbookEntries" style="max-height: 180px; overflow-y: auto; margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px;">
             <div style="padding: 10px; border-bottom: 1px dashed #ddd;">
-                <strong>Anonymous Visitor</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
-                <p style="margin: 5px 0 0 0;">Cool site! Love the retro vibes!</p>
+                <strong>WebSurfer2000</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
+                <p style="margin: 5px 0 0 0;">Cool site! Takes me back to the old internet days.</p>
             </div>
             <div style="padding: 10px;">
-                <strong>WebSurfer2000</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
-                <p style="margin: 5px 0 0 0;">Thanks for keeping the old web spirit alive! ✨</p>
+                <strong>Anonymous</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
+                <p style="margin: 5px 0 0 0;">Love the retro vibes. More sites should be like this.</p>
             </div>
         </div>
 
-        <h3 style="color: #333;">Sign the Guestbook</h3>
         <form id="guestbookForm" style="display: flex; flex-direction: column; gap: 10px;">
-            <input type="text" id="guestName" placeholder="Your name (or stay anonymous)"
+            <input type="text" id="guestName" placeholder="Name (optional)"
                    style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-            <textarea id="guestMessage" placeholder="Leave your message..." rows="3" required
+            <textarea id="guestMessage" placeholder="Your message" rows="3" required
                       style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
             <button type="submit" style="padding: 10px; background: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                ✍️ Sign Guestbook
+                Sign
             </button>
         </form>
         <p style="font-size: 11px; color: #999; margin-top: 10px;">
-            Note: This is a frontend-only demo. Messages are not permanently stored (yet!).
+            Frontend-only for now, messages won't persist.
         </p>
     `;
 
@@ -1108,246 +1092,70 @@ function openProjectDetail(projectId) {
         rulemapping: {
             title: 'Rulemapping Group',
             color: '#1abc9c',
-            content: `# Rulemapping Group 📊
-
-**Role:** Senior AI & Data Expert
-**Period:** September 2025 - Present
-**Type:** Full-time
-
----
-
-## About
-
-Currently working as Senior AI & Data Expert at Rulemapping Group, bringing expertise in machine learning, data engineering, and AI solutions architecture to drive data-driven decision making and AI implementation.
-
----
-
-**Focus Areas:** AI Strategy, Data Architecture, ML Solutions`
+            content: `Since September 2025 I work as Senior AI & Data Expert at Rulemapping Group, bringing my experience in ML engineering and data architecture to drive data-driven decision making and AI implementations.`
         },
         krisenchat: {
             title: 'Krisenchat',
             color: '#e74c3c',
-            content: `# Krisenchat 💬
+            content: `Krisenchat is Germany's 24/7 crisis counseling service for young people via chat. I worked there for over four years in various roles.
 
-**Germany's 24/7 Crisis Chat Service for Young People**
-**Period:** June 2021 - October 2025 (4+ years)
-**Location:** Berlin, Germany
+I started in 2021 as a researcher - evaluations, dashboards, data architecture. In 2022 I moved to the tech team as Machine Learning Engineer. There I built the MLOps infrastructure and developed various ML models: a transformer for capacity planning, sentence transformers for risk monitoring, Graph Neural Networks for complex risk analysis, and later agentic LLM applications for counseling support.
 
----
+In 2025 I became AI Solutions Architect. This role was mainly about mediating between the therapeutic requirements of counselors and technical possibilities. How do you build AI systems that support without restricting therapeutic autonomy? That was the central question.
 
-## My Journey
-
-### AI Solutions Architect (2025)
-- Architected AI systems supporting counselors while preserving therapeutic agency
-- Bridged communication between therapeutic requirements and technical implementation
-- Designed GDPR-compliant infrastructure for sensitive mental health data
-- Identified and mitigated risks around data privacy, therapeutic safety, and AI ethics
-
-### Machine Learning Engineer (2022-2025)
-- Conceptualized and maintained automated MLOps architecture
-- Managed full ML model lifecycle from MLflow experimentation to GCP deployment
-- Developed CI/CD pipelines for continuous model development
-
-**Key ML Contributions:**
-- Deployed custom LLMs for automated documentation and counseling support
-- Created multivariate time series transformer for capacity planning
-- Developed dual-encoder sentence-transformer for suicide risk monitoring
-- Implemented heterogeneous Graph Neural Network for complex risk analysis
-- Built agentic LLM solutions for complex counseling strategies
-- Fully autonomous LLM applications performing self-directed diagnostic workloads
-
-### Scientist (2021-2022)
-- Service evaluations, analytics, and dashboard development
-- Designed data-warehousing architectures and ETL workflows
-- Developed AI models for risk management
-- Oversaw publication processes from research to dissemination
-
----
-
-**Tech Stack:** Python, PostgreSQL, TensorFlow, vLLM, GCP, Terraform, Kubernetes, MLflow`
+Working at krisenchat shaped me significantly - this is where I learned what it means to develop AI for sensitive contexts.`
         },
         xemantic: {
             title: 'Xemantic',
             color: '#9b59b6',
-            content: `# Xemantic 🎨
+            content: `Xemantic is an art collective I've been part of since 2021. Our motto: Applied philosophy as code and politics.
 
-**Art Collective & Applied Philosophy**
-**Role:** Self-Employed / Freelance
-**Period:** February 2021 - Present
-**Location:** Berlin, Germany
+We do generative art, performances with technology, live coding. Everything open source. A current project is anthropic-sdk-kotlin - an unofficial Kotlin variant of the Anthropic SDK.
 
----
+I'm also part of Prachtsaal, a shared studio cooperative in Berlin. This community gives me daily learning opportunities and a sense of belonging.
 
-## About Xemantic
+We're selective about collaborations - we look for projects that blend applied philosophy with code.
 
-An art collective where **applied philosophy meets code and politics**. We blend creative expression with technical innovation.
-
-## What We Do
-
-### Creative Technology
-- **Generative Art** - Algorithmic and procedural art creation
-- **Performative Art** - Live performances with technology
-- **Live Coding** - Real-time creative programming
-- **Custom Rendering** - Visual computing and graphics
-
-### Open Source
-- Dedicated to open-source practices
-- Developing innovative artistic software tools
-- **anthropic-sdk-kotlin** - Unofficial Kotlin multiplatform variant of the Anthropic SDK
-
-### Prachtsaal
-Contributing to a shared atelier cooperative - a community offering daily learning opportunities and fulfillment.
-
----
-
-## Collaboration
-
-We are selective in our engagements, focusing on projects that blend applied philosophy with coding.
-
-**Links:**
-- Website: [xemantic.com](https://www.xemantic.com)
-- GitHub: [github.com/xemantic](https://github.com/xemantic)
-
----
-
-*"Applied philosophy as code and politics"*`
+More at xemantic.com and github.com/xemantic`
         },
         publications: {
             title: 'Publications',
             color: '#3498db',
-            content: `# Academic Publications 📚
+            content: `I have 14 scientific publications, mainly in AI and mental health.
 
-**14 Publications** | **1,053 Reads** | **71 Citations**
+Recent work (2024-2025) deals with Large Language Models for automated suicide risk assessment - how reliable are LLM ratings compared to human experts? I also developed and validated an Explainable AI text classifier for suicidality prediction.
 
----
+Earlier work (2022-2023) examined krisenchat usage patterns: Who are the frequent users? What linguistic patterns emerge? How does socioeconomic status relate to counseling success?
 
-## Recent Publications
+The first publications (2022) investigated the basic acceptability and feasibility of messenger-based crisis counseling for young people.
 
-### 2025
-**Large language model performance versus human expert ratings in automated suicide risk assessment**
-*Frontiers in Psychiatry, November 2025*
-Investigating conditions for reliable LLM-based psychological assessments, comparing LLM-generated ratings with human expert ratings.
-
-**An Explainable AI Text Classifier for Suicidality Prediction**
-*JMIR, January 2025*
-Development and validation of transformer-based AI for predicting suicidal ideation in crisis text line users.
-
-### 2024
-**The association of socioeconomic status with the success of chat-based online counseling**
-*June 2024*
-Latent change score modeling approach exploring SES and online counseling outcomes.
-
-### 2023
-**Who are frequent chatters?**
-*June 2023*
-Characterization of frequent users in 24/7 messenger-based counseling services.
-
-**Linguistic variables and gender differences in chat counseling**
-*August 2023*
-Cross-sectional study on language patterns in youth mental health support.
-
-### 2022
-**Suicidal Ideation Among Children and Young Adults in Crisis Chat**
-*Frontiers in Psychiatry, March 2022*
-Study on suicidal ideation in 24/7 messenger-based psychological chat counseling.
-
-**Acceptability and feasibility of messenger-based counselling ("krisenchat")**
-*Internet Interventions, February 2022*
-Cross-sectional study on chat-based mental health support for youth.
-
----
-
-**Research Focus:** AI in Mental Health, Suicide Risk Assessment, Crisis Intervention, LLMs in Clinical Settings`
+Over 1000 reads and 71 citations total.`
         },
         phd: {
             title: 'PhD Research',
             color: '#e67e22',
-            content: `# PhD Research 🎓
+            content: `Since 2023 I'm doing my PhD at University of Basel in Clinical Psychology and Epidemiology.
 
-**Institution:** University of Basel
-**Department:** Klinische Psychologie und Epidemiologie
-**Period:** August 2023 - September 2026 (expected)
+My research topic: Agentic AI for autonomous diagnostic systems. How can AI agents support clinical diagnoses while remaining transparent, explainable, and ethically sound?
 
----
+In parallel, I'm training as a psychotherapist at Klinik Bergfried in Saalfeld - individual and group therapy, relaxation techniques, competence training.
 
-## Research Focus
+My background: Master's in Clinical Psychology at IPU Berlin, then a CAS in Advanced Machine Learning at University of Bern focusing on Graph Neural Networks.
 
-### Agentic AI for Autonomous Diagnostic Systems
-
-Exploring how autonomous AI agents can assist in clinical diagnostics while maintaining transparency, explainability, and ethical standards in mental health settings.
-
-## Skills & Methods
-- Methods in Epidemiology
-- Test Construction
-- Psychological Assessment
-- Applied Artificial Intelligence
-
-## Related Background
-
-### Psychotherapist in Training (PiA)
-**Klinik Bergfried Saalfeld** (2024-2025)
-- Psychotherapy in individual and group settings
-- Relaxation techniques and competence training
-- Indicative groups and applications
-
-### Education
-**CAS Advanced Machine Learning** - University of Bern (2022-2023)
-- Graph Neural Networks
-- Mathematical Foundations of AI
-
-**Master Clinical Psychology** - IPU Berlin (2019-2021)
-
----
-
-*Bridging clinical psychology, epidemiology, and artificial intelligence*`
+The combination of clinical practice and technical research matters to me - I want to understand what therapists actually need before building tools for them.`
         },
         freelance: {
-            title: 'Freelance Work',
+            title: 'Freelance',
             color: '#e91e63',
-            content: `# Freelance & Consulting 💡
+            content: `Besides my regular projects, I selectively take on freelance work.
 
-**AI Solutions with Purpose**
+My focus is on AI applications in mental health and other socially relevant contexts. I like building systems that support people rather than replace them - tools that preserve therapeutic autonomy while reducing administrative burden.
 
----
+Technically I'm especially interested in graph-based systems, Explainable AI, and agentic LLM applications. "The AI said so" isn't good enough as an explanation, especially not in healthcare.
 
-## Focus Areas
+I'm picky about projects. I prefer working on things that have real impact, bridge disciplines, and treat ethics as more than a checkbox.
 
-### AI for Mental Health & Social Impact
-Building intelligent systems that support human wellbeing - not replace human connection. Specializing in tools that preserve therapeutic agency while reducing administrative burden.
-
-### Graph-Based Reasoning Systems
-Knowledge graphs, Graph Neural Networks, and semantic architectures for complex domains. Making AI that can reason about relationships, not just patterns.
-
-### Explainable AI
-Because "the AI said so" isn't good enough - especially in healthcare. Building transparent systems where decisions can be understood and challenged.
-
-### Agentic LLM Applications
-Autonomous systems that can plan, reason, and execute complex workflows end-to-end, while keeping humans in the loop where it matters.
-
----
-
-## Philosophy
-
-I'm selective about collaborations, focusing on projects that:
-
-- **Have genuine impact** on people's lives
-- **Bridge disciplines** - where psychology meets technology
-- **Prioritize ethics** over optimization metrics
-- **Embrace open-source** practices
-
----
-
-## Let's Talk If You're Working On
-
-- Mental health technology
-- Clinical decision support systems
-- Knowledge graph applications
-- AI ethics and safety
-- Research tooling for psychology/psychiatry
-
----
-
-**Get in touch via the Contact window!**`
+If interested, reach out via Contact.`
         }
     };
 

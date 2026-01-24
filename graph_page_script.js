@@ -49,21 +49,17 @@ document.addEventListener('DOMContentLoaded', () => {
     .attr("d", "M0,-5L10,0L0,5")
     .attr("fill", "#999");
 
-  // Add indicator for expandable nodes
+  // Add indicator for expandable nodes (+ symbol inside hexagon)
   svg.append("defs")
     .append("g")
     .attr("id", "expandIcon")
-    .attr("fill", "#fff")
-    .attr("stroke", "none")
-    .html('<circle r="6" fill="#000" stroke="#fff"/><path d="M-3,0 h6 M0,-3 v6" stroke="#fff" stroke-width="1.5"/>');
+    .html('<path d="M-4,0 h8 M0,-4 v8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
 
-  // Add indicator for collapsible nodes
+  // Add indicator for collapsible nodes (- symbol inside hexagon)
   svg.append("defs")
     .append("g")
     .attr("id", "collapseIcon")
-    .attr("fill", "#fff")
-    .attr("stroke", "none")
-    .html('<circle r="6" fill="#000" stroke="#fff"/><path d="M-3,0 h6" stroke="#fff" stroke-width="1.5"/>');
+    .html('<path d="M-4,0 h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
 
   // Create zoom behavior
   const zoom = d3.zoom()
@@ -173,9 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
       .enter()
       .append('line')
       .attr('class', d => `link ${d.type}`)
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
-      .attr('stroke-width', 1.5)
+      .attr('stroke', '#fff')
+      .attr('stroke-opacity', 0.4)
+      .attr('stroke-width', 1)
       .attr('stroke-dasharray', d => {
         // Use dashed lines for certain relationship types
         return ['perspective', 'philosophy', 'thinking'].includes(d.type) ? '5,5' : null;
@@ -376,9 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const linksEnter = links.enter()
       .append('line')
       .attr('class', d => `link ${d.type}`)
-      .attr('stroke', '#999')
+      .attr('stroke', '#fff')
       .attr('stroke-opacity', 0)
-      .attr('stroke-width', 1.5)
+      .attr('stroke-width', 1)
       .attr('stroke-dasharray', d => {
         return ['perspective', 'philosophy', 'thinking'].includes(d.type) ? '5,5' : null;
       })
@@ -396,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     links.transition()
       .duration(500)
-      .attr('stroke-opacity', 0.6);
+      .attr('stroke-opacity', 0.4);
 
     // Update nodes
     nodeGroup = nodesGroup.selectAll('g.node')
@@ -530,19 +526,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remove all existing icons
     nodesGroup.selectAll('.expand-icon, .collapse-icon').remove();
 
-    // Add icons to nodes
+    // Add icons to nodes - centered inside the hexagon
     nodeGroup.each(function(d) {
       if (graphExplorer.hasUnexploredConnections(d.id)) {
         const isExpanded = graphExplorer.isNodeExpanded(d.id);
 
-        // Add either expand or collapse icon
+        // Add either expand or collapse icon in the center of the node
         d3.select(this)
           .append('use')
           .attr('href', isExpanded ? '#collapseIcon' : '#expandIcon')
           .attr('class', isExpanded ? 'collapse-icon' : 'expand-icon')
           .attr('x', 0)
-          .attr('y', 0)
-          .attr('transform', `translate(${nodeRadius * 0.8}, ${-nodeRadius * 0.8})`);
+          .attr('y', 0);
       }
     });
   }

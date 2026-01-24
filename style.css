@@ -2,7 +2,19 @@ body {
     font-family: monospace;
     background: transparent;
     margin: 0;
+}
 
+#icons-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 40px);
+    pointer-events: none;
+}
+
+#icons-container .drag-element {
+    pointer-events: auto;
 }
 .bg-image {
     background: url(anime-bg.webp) no-repeat;
@@ -56,6 +68,10 @@ body {
     color: #333;
     padding: 15px;
     overflow-y: auto;
+    box-sizing: border-box;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .markdown-content h1, .markdown-content h2, .markdown-content h3 {
@@ -153,9 +169,11 @@ body {
             backdrop-filter: blur(8px);
             border-radius: 5px;
             box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-            min-width: 300px;
-            min-height: 200px;
+            min-width: 250px;
+            min-height: 150px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .window-header {
@@ -170,6 +188,7 @@ body {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .window-title {
@@ -206,12 +225,22 @@ body {
 
         .window-content {
             padding: 15px;
-            height: calc(100% - 40px);
+            flex: 1;
             overflow: auto;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .window-content:has(iframe) {
             padding: 0;
+        }
+
+        .window-content p,
+        .window-content div {
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .window-resize-handle {
@@ -306,4 +335,133 @@ body {
 
 .taskbar-item.minimized {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    /* Windows take nearly full width on mobile */
+    .window {
+        width: calc(100vw - 20px) !important;
+        left: 10px !important;
+        min-width: unset;
+        max-width: calc(100vw - 20px);
+    }
+
+    .window-content {
+        padding: 10px;
+    }
+
+    /* Icons container becomes a flex row on mobile */
+    #icons-container {
+        position: fixed;
+        bottom: 45px;
+        top: auto;
+        left: 0;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        pointer-events: auto;
+        z-index: 100;
+    }
+
+    /* Icons in a row on mobile */
+    .drag-element {
+        position: relative !important;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+        top: auto !important;
+        left: auto !important;
+        width: 55px;
+        height: auto;
+        padding: 5px;
+    }
+
+    body {
+        padding-bottom: 50px;
+    }
+
+    /* Smaller taskbar items */
+    .taskbar-item {
+        padding: 0 6px;
+        font-size: 12px;
+        height: 26px;
+    }
+
+    .taskbar-time {
+        padding: 0 6px;
+        font-size: 12px;
+        height: 26px;
+    }
+
+    #taskbar {
+        height: 35px;
+    }
+
+    /* Larger touch targets for window controls */
+    .window-control {
+        width: 24px;
+        height: 24px;
+        margin-left: 10px;
+    }
+
+    /* Markdown content adjustments */
+    .markdown-content {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .markdown-content h1 {
+        font-size: 1.4em;
+    }
+
+    .markdown-content h2 {
+        font-size: 1.2em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* Even smaller screens */
+    .window {
+        width: calc(100vw - 10px) !important;
+        left: 5px !important;
+    }
+
+    .window-title {
+        font-size: 14px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .drag-element {
+        width: 45px;
+        height: 60px;
+        padding: 5px;
+    }
+
+    .drag-element-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .drag-element-text p {
+        font-size: 11px;
+    }
+
+    .taskbar-item {
+        padding: 0 4px;
+        font-size: 10px;
+        max-width: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
