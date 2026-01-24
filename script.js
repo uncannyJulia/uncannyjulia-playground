@@ -1,5 +1,5 @@
 // loading and declaring variables
-const icons = ["icons/kitty.png", "icons/dog.png", "icons/bunny.png", "icons/about.png", "icons/contact.png", "icons/folder.png"]; // Replace with your actual icons
+const icons = ["icons/kitty.png", "icons/bunny.png", "icons/about.png", "icons/contact.png", "icons/folder.png"]; // Replace with your actual icons
 const klick = new Audio('icons/klick.mp3');
 
 // Initialize markdown parser
@@ -85,7 +85,11 @@ function createDraggableElement(iconName, index) {
     // Extract name without extension and folder path for the label
     const fileName = iconName.split('/').pop(); // Remove folder path
     const label = fileName.split('.')[0]; // Remove file extension
-    textContent.textContent = label;
+    // Display name mapping for icons
+    const displayNames = {
+        'folder': 'projects'
+    };
+    textContent.textContent = displayNames[label] || label;
 
     // Assemble the elements
     textDiv.appendChild(textContent);
@@ -110,6 +114,12 @@ function createDraggableElement(iconName, index) {
                 createWindow('About', '', '#8d95e7', 600, 500, null, false, 'content/vita.md');
             } else if (label === 'contact') {
                 createContactWindow();
+            } else if (label === 'kitty') {
+                createKittyGalleryWindow();
+            } else if (label === 'bunny') {
+                createGuestbookWindow();
+            } else if (label === 'folder' || label === 'projects') {
+                createProjectsWindow();
             } else {
                 createWindow(label, `This is the ${label} application window`);
             }
@@ -201,6 +211,12 @@ function makeDraggable(element) {
                         createWindow('About', '', '#8d95e7', 600, 500, null, false, 'content/vita.md');
                     } else if (label === 'contact') {
                         createContactWindow();
+                    } else if (label === 'kitty') {
+                        createKittyGalleryWindow();
+                    } else if (label === 'bunny') {
+                        createGuestbookWindow();
+                    } else if (label === 'folder' || label === 'projects') {
+                        createProjectsWindow();
                     } else {
                         createWindow(label, `This is the ${label} application window`);
                     }
@@ -930,5 +946,413 @@ function closeEmailComposer() {
     const emailWindow = windows.find(w => w.title === 'Email Composer');
     if (emailWindow) {
         closeWindow(emailWindow.element);
+    }
+}
+
+// Create Kitty Gallery window with cat video
+function createKittyGalleryWindow() {
+    const kittyContent = `# Kitty Gallery 🐱
+
+Meet my beloved cat!
+
+<div style="text-align: center; margin: 20px 0;">
+    <video width="100%" controls style="max-width: 480px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+        <source src="content/MicrosoftTeams-video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+---
+
+*More photos and videos coming soon!*`;
+
+    createWindow('Kitty Gallery', kittyContent, '#f5a6c9', 550, 500, null, true);
+}
+
+// Create Guestbook window
+function createGuestbookWindow() {
+    const guestbookContent = document.createElement('div');
+    guestbookContent.style.padding = '15px';
+    guestbookContent.innerHTML = `
+        <h2 style="margin-top: 0; color: #333; border-bottom: 2px solid #9b59b6; padding-bottom: 10px;">📖 Guestbook</h2>
+        <p style="color: #666; font-style: italic;">Leave your mark! Just like the good old days of the internet.</p>
+
+        <div id="guestbookEntries" style="max-height: 200px; overflow-y: auto; margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+            <div style="padding: 10px; border-bottom: 1px dashed #ddd;">
+                <strong>Anonymous Visitor</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
+                <p style="margin: 5px 0 0 0;">Cool site! Love the retro vibes!</p>
+            </div>
+            <div style="padding: 10px;">
+                <strong>WebSurfer2000</strong> <span style="color: #999; font-size: 12px;">- Jan 2026</span>
+                <p style="margin: 5px 0 0 0;">Thanks for keeping the old web spirit alive! ✨</p>
+            </div>
+        </div>
+
+        <h3 style="color: #333;">Sign the Guestbook</h3>
+        <form id="guestbookForm" style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="text" id="guestName" placeholder="Your name (or stay anonymous)"
+                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <textarea id="guestMessage" placeholder="Leave your message..." rows="3" required
+                      style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+            <button type="submit" style="padding: 10px; background: #9b59b6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ✍️ Sign Guestbook
+            </button>
+        </form>
+        <p style="font-size: 11px; color: #999; margin-top: 10px;">
+            Note: This is a frontend-only demo. Messages are not permanently stored (yet!).
+        </p>
+    `;
+
+    const guestbookWindow = createWindow('Guestbook', guestbookContent, '#9b59b6', 450, 550);
+
+    // Add form handler
+    const form = guestbookContent.querySelector('#guestbookForm');
+    const entries = guestbookContent.querySelector('#guestbookEntries');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('guestName').value || 'Anonymous Visitor';
+        const message = document.getElementById('guestMessage').value;
+
+        if (message.trim()) {
+            const newEntry = document.createElement('div');
+            newEntry.style.cssText = 'padding: 10px; border-bottom: 1px dashed #ddd; animation: fadeIn 0.3s;';
+            newEntry.innerHTML = `
+                <strong>${name}</strong> <span style="color: #999; font-size: 12px;">- Just now</span>
+                <p style="margin: 5px 0 0 0;">${message}</p>
+            `;
+            entries.insertBefore(newEntry, entries.firstChild);
+
+            form.reset();
+        }
+    });
+}
+
+// Create Projects folder window with clickable project icons
+function createProjectsWindow() {
+    const projectsContent = document.createElement('div');
+    projectsContent.style.cssText = 'padding: 10px;';
+
+    const projects = [
+        {
+            id: 'rulemapping',
+            icon: 'icons/layers.png',
+            name: 'Rulemapping'
+        },
+        {
+            id: 'krisenchat',
+            icon: 'icons/touch.png',
+            name: 'Krisenchat'
+        },
+        {
+            id: 'xemantic',
+            icon: 'icons/phi.png',
+            name: 'Xemantic'
+        },
+        {
+            id: 'publications',
+            icon: 'icons/microscope.png',
+            name: 'Publications'
+        },
+        {
+            id: 'phd',
+            icon: 'icons/diploma.png',
+            name: 'PhD Research'
+        },
+        {
+            id: 'freelance',
+            icon: 'icons/freelancer.png',
+            name: 'Freelance'
+        }
+    ];
+
+    projectsContent.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; padding: 5px;">
+            ${projects.map(p => `
+                <div class="project-icon" data-project="${p.id}" style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 10px 5px;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    background: rgba(141, 149, 231, 0.1);
+                " onmouseover="this.style.background='rgba(141, 149, 231, 0.25)'" onmouseout="this.style.background='rgba(141, 149, 231, 0.1)'">
+                    <img src="${p.icon}" alt="${p.name}" style="
+                        width: 50px;
+                        height: 50px;
+                        margin-bottom: 8px;
+                    ">
+                    <span style="color: #333; font-size: 11px; text-align: center; word-wrap: break-word; max-width: 70px;">${p.name}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    const projectWindow = createWindow('Projects', projectsContent, '#8d95e7', 380, 320);
+
+    // Add click handlers for each project icon
+    projectsContent.querySelectorAll('.project-icon').forEach(icon => {
+        icon.addEventListener('dblclick', () => {
+            const projectId = icon.getAttribute('data-project');
+            openProjectDetail(projectId);
+        });
+    });
+}
+
+// Open individual project detail windows
+function openProjectDetail(projectId) {
+    const projectDetails = {
+        rulemapping: {
+            title: 'Rulemapping Group',
+            color: '#1abc9c',
+            content: `# Rulemapping Group 📊
+
+**Role:** Senior AI & Data Expert
+**Period:** September 2025 - Present
+**Type:** Full-time
+
+---
+
+## About
+
+Currently working as Senior AI & Data Expert at Rulemapping Group, bringing expertise in machine learning, data engineering, and AI solutions architecture to drive data-driven decision making and AI implementation.
+
+---
+
+**Focus Areas:** AI Strategy, Data Architecture, ML Solutions`
+        },
+        krisenchat: {
+            title: 'Krisenchat',
+            color: '#e74c3c',
+            content: `# Krisenchat 💬
+
+**Germany's 24/7 Crisis Chat Service for Young People**
+**Period:** June 2021 - October 2025 (4+ years)
+**Location:** Berlin, Germany
+
+---
+
+## My Journey
+
+### AI Solutions Architect (2025)
+- Architected AI systems supporting counselors while preserving therapeutic agency
+- Bridged communication between therapeutic requirements and technical implementation
+- Designed GDPR-compliant infrastructure for sensitive mental health data
+- Identified and mitigated risks around data privacy, therapeutic safety, and AI ethics
+
+### Machine Learning Engineer (2022-2025)
+- Conceptualized and maintained automated MLOps architecture
+- Managed full ML model lifecycle from MLflow experimentation to GCP deployment
+- Developed CI/CD pipelines for continuous model development
+
+**Key ML Contributions:**
+- Deployed custom LLMs for automated documentation and counseling support
+- Created multivariate time series transformer for capacity planning
+- Developed dual-encoder sentence-transformer for suicide risk monitoring
+- Implemented heterogeneous Graph Neural Network for complex risk analysis
+- Built agentic LLM solutions for complex counseling strategies
+- Fully autonomous LLM applications performing self-directed diagnostic workloads
+
+### Scientist (2021-2022)
+- Service evaluations, analytics, and dashboard development
+- Designed data-warehousing architectures and ETL workflows
+- Developed AI models for risk management
+- Oversaw publication processes from research to dissemination
+
+---
+
+**Tech Stack:** Python, PostgreSQL, TensorFlow, vLLM, GCP, Terraform, Kubernetes, MLflow`
+        },
+        xemantic: {
+            title: 'Xemantic',
+            color: '#9b59b6',
+            content: `# Xemantic 🎨
+
+**Art Collective & Applied Philosophy**
+**Role:** Self-Employed / Freelance
+**Period:** February 2021 - Present
+**Location:** Berlin, Germany
+
+---
+
+## About Xemantic
+
+An art collective where **applied philosophy meets code and politics**. We blend creative expression with technical innovation.
+
+## What We Do
+
+### Creative Technology
+- **Generative Art** - Algorithmic and procedural art creation
+- **Performative Art** - Live performances with technology
+- **Live Coding** - Real-time creative programming
+- **Custom Rendering** - Visual computing and graphics
+
+### Open Source
+- Dedicated to open-source practices
+- Developing innovative artistic software tools
+- **anthropic-sdk-kotlin** - Unofficial Kotlin multiplatform variant of the Anthropic SDK
+
+### Prachtsaal
+Contributing to a shared atelier cooperative - a community offering daily learning opportunities and fulfillment.
+
+---
+
+## Collaboration
+
+We are selective in our engagements, focusing on projects that blend applied philosophy with coding.
+
+**Links:**
+- Website: [xemantic.com](https://www.xemantic.com)
+- GitHub: [github.com/xemantic](https://github.com/xemantic)
+
+---
+
+*"Applied philosophy as code and politics"*`
+        },
+        publications: {
+            title: 'Publications',
+            color: '#3498db',
+            content: `# Academic Publications 📚
+
+**14 Publications** | **1,053 Reads** | **71 Citations**
+
+---
+
+## Recent Publications
+
+### 2025
+**Large language model performance versus human expert ratings in automated suicide risk assessment**
+*Frontiers in Psychiatry, November 2025*
+Investigating conditions for reliable LLM-based psychological assessments, comparing LLM-generated ratings with human expert ratings.
+
+**An Explainable AI Text Classifier for Suicidality Prediction**
+*JMIR, January 2025*
+Development and validation of transformer-based AI for predicting suicidal ideation in crisis text line users.
+
+### 2024
+**The association of socioeconomic status with the success of chat-based online counseling**
+*June 2024*
+Latent change score modeling approach exploring SES and online counseling outcomes.
+
+### 2023
+**Who are frequent chatters?**
+*June 2023*
+Characterization of frequent users in 24/7 messenger-based counseling services.
+
+**Linguistic variables and gender differences in chat counseling**
+*August 2023*
+Cross-sectional study on language patterns in youth mental health support.
+
+### 2022
+**Suicidal Ideation Among Children and Young Adults in Crisis Chat**
+*Frontiers in Psychiatry, March 2022*
+Study on suicidal ideation in 24/7 messenger-based psychological chat counseling.
+
+**Acceptability and feasibility of messenger-based counselling ("krisenchat")**
+*Internet Interventions, February 2022*
+Cross-sectional study on chat-based mental health support for youth.
+
+---
+
+**Research Focus:** AI in Mental Health, Suicide Risk Assessment, Crisis Intervention, LLMs in Clinical Settings`
+        },
+        phd: {
+            title: 'PhD Research',
+            color: '#e67e22',
+            content: `# PhD Research 🎓
+
+**Institution:** University of Basel
+**Department:** Klinische Psychologie und Epidemiologie
+**Period:** August 2023 - September 2026 (expected)
+
+---
+
+## Research Focus
+
+### Agentic AI for Autonomous Diagnostic Systems
+
+Exploring how autonomous AI agents can assist in clinical diagnostics while maintaining transparency, explainability, and ethical standards in mental health settings.
+
+## Skills & Methods
+- Methods in Epidemiology
+- Test Construction
+- Psychological Assessment
+- Applied Artificial Intelligence
+
+## Related Background
+
+### Psychotherapist in Training (PiA)
+**Klinik Bergfried Saalfeld** (2024-2025)
+- Psychotherapy in individual and group settings
+- Relaxation techniques and competence training
+- Indicative groups and applications
+
+### Education
+**CAS Advanced Machine Learning** - University of Bern (2022-2023)
+- Graph Neural Networks
+- Mathematical Foundations of AI
+
+**Master Clinical Psychology** - IPU Berlin (2019-2021)
+
+---
+
+*Bridging clinical psychology, epidemiology, and artificial intelligence*`
+        },
+        freelance: {
+            title: 'Freelance Work',
+            color: '#e91e63',
+            content: `# Freelance & Consulting 💡
+
+**AI Solutions with Purpose**
+
+---
+
+## Focus Areas
+
+### AI for Mental Health & Social Impact
+Building intelligent systems that support human wellbeing - not replace human connection. Specializing in tools that preserve therapeutic agency while reducing administrative burden.
+
+### Graph-Based Reasoning Systems
+Knowledge graphs, Graph Neural Networks, and semantic architectures for complex domains. Making AI that can reason about relationships, not just patterns.
+
+### Explainable AI
+Because "the AI said so" isn't good enough - especially in healthcare. Building transparent systems where decisions can be understood and challenged.
+
+### Agentic LLM Applications
+Autonomous systems that can plan, reason, and execute complex workflows end-to-end, while keeping humans in the loop where it matters.
+
+---
+
+## Philosophy
+
+I'm selective about collaborations, focusing on projects that:
+
+- **Have genuine impact** on people's lives
+- **Bridge disciplines** - where psychology meets technology
+- **Prioritize ethics** over optimization metrics
+- **Embrace open-source** practices
+
+---
+
+## Let's Talk If You're Working On
+
+- Mental health technology
+- Clinical decision support systems
+- Knowledge graph applications
+- AI ethics and safety
+- Research tooling for psychology/psychiatry
+
+---
+
+**Get in touch via the Contact window!**`
+        }
+    };
+
+    const project = projectDetails[projectId];
+    if (project) {
+        createWindow(project.title, project.content, project.color, 550, 500, null, true);
     }
 }

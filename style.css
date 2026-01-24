@@ -6,7 +6,7 @@ body {
 }
 .bg-image {
     background: url(anime-bg.webp) no-repeat;
-    position: absolute;
+    position: fixed;
     filter: grayscale(100%);
     opacity: 0.5;
     top: 0;
@@ -15,6 +15,7 @@ body {
     height: 100%;
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
     z-index: -1;
 }
 
@@ -148,7 +149,8 @@ body {
 /* Window Styles */
         .window {
             position: absolute;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(8px);
             border-radius: 5px;
             box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
             min-width: 300px;
@@ -157,7 +159,7 @@ body {
         }
 
         .window-header {
-            background-color: #8d95e7;
+            background-color: rgba(141, 149, 231, 0.8);
             border-style: dashed;
             border-width: 0px 0px 1px 0px;
             border-radius: 5px;
@@ -206,6 +208,10 @@ body {
             padding: 15px;
             height: calc(100% - 40px);
             overflow: auto;
+        }
+
+        .window-content:has(iframe) {
+            padding: 0;
         }
 
         .window-resize-handle {
@@ -265,7 +271,7 @@ body {
     height: 30px;
     padding: 0 10px;
     color: white;
-    background-color: #8d95e7;
+    background-color: rgba(141, 149, 231, 0.8);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -285,7 +291,7 @@ body {
     height: 30px;
     padding: 0 10px;
     color: white;
-    background-color: #8d95e7;
+    background-color: rgba(141, 149, 231, 0.8);
     border-radius: 4px;
     margin-right: 5px; /* Space between items */
     display: flex;
@@ -295,7 +301,7 @@ body {
 }
 
 .taskbar-item:hover {
-    background-color: #8d95e7;
+    background-color: rgba(141, 149, 231, 0.9);
 }
 
 .taskbar-item.minimized {
