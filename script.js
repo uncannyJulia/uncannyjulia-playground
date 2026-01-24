@@ -1,5 +1,5 @@
 // loading and declaring variables
-const icons = ["icons/kitty.png", "icons/bunny.png", "icons/about.png", "icons/contact.png", "icons/folder.png"]; // Replace with your actual icons
+const icons = ["icons/kitty.png", "icons/bunny.png", "icons/dog.png", "icons/about.png", "icons/contact.png", "icons/folder.png"]; // Replace with your actual icons
 const klick = new Audio('icons/klick.mp3');
 
 // Initialize markdown parser
@@ -87,7 +87,9 @@ function createDraggableElement(iconName, index) {
     const label = fileName.split('.')[0]; // Remove file extension
     // Display name mapping for icons
     const displayNames = {
-        'folder': 'projects'
+        'folder': 'projects',
+        'dog': 'blog',
+        'bunny': 'bunny-book'
     };
     textContent.textContent = displayNames[label] || label;
 
@@ -117,10 +119,12 @@ function createDraggableElement(iconName, index) {
                 createContactWindow();
             } else if (label === 'kitty') {
                 createKittyGalleryWindow();
-            } else if (label === 'bunny') {
+            } else if (label === 'bunny' || label === 'bunny-book') {
                 createGuestbookWindow();
             } else if (label === 'folder' || label === 'projects') {
                 createProjectsWindow();
+            } else if (label === 'dog' || label === 'blog') {
+                createBlogWindow();
             } else {
                 createWindow(label, `This is the ${label} application window`);
             }
@@ -214,10 +218,12 @@ function makeDraggable(element) {
                         createContactWindow();
                     } else if (label === 'kitty') {
                         createKittyGalleryWindow();
-                    } else if (label === 'bunny') {
+                    } else if (label === 'bunny' || label === 'bunny-book') {
                         createGuestbookWindow();
                     } else if (label === 'folder' || label === 'projects') {
                         createProjectsWindow();
+                    } else if (label === 'dog' || label === 'blog') {
+                        createBlogWindow();
                     } else {
                         createWindow(label, `This is the ${label} application window`);
                     }
@@ -1010,6 +1016,50 @@ function createGuestbookWindow() {
 
             form.reset();
         }
+    });
+}
+
+// Create Blog window with list of posts
+function createBlogWindow() {
+    const blogPosts = [
+        {
+            id: 'alignment',
+            title: 'The AI Alignment Problem: A Smokescreen',
+            date: '2026-01-24',
+            file: 'blog/alignment.md'
+        }
+    ];
+
+    const blogContent = document.createElement('div');
+    blogContent.style.padding = '15px';
+
+    blogContent.innerHTML = `
+        <p style="color: #666; margin-top: 0; margin-bottom: 15px;">Thoughts and writings.</p>
+        <div class="blog-list" style="display: flex; flex-direction: column; gap: 10px;">
+            ${blogPosts.map(post => `
+                <div class="blog-item" data-file="${post.file}" data-title="${post.title}" style="
+                    padding: 12px;
+                    background: rgba(141, 149, 231, 0.1);
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='rgba(141, 149, 231, 0.25)'" onmouseout="this.style.background='rgba(141, 149, 231, 0.1)'">
+                    <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${post.title}</div>
+                    <div style="font-size: 12px; color: #888;">${post.date}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    const blogWindow = createWindow('Blog', blogContent, '#e67e22', 450, 350);
+
+    // Add click handlers for blog posts
+    blogContent.querySelectorAll('.blog-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const file = item.getAttribute('data-file');
+            const title = item.getAttribute('data-title');
+            createWindow(title, '', '#e67e22', 600, 500, null, false, file);
+        });
     });
 }
 
