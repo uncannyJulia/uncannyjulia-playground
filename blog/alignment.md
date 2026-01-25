@@ -34,7 +34,7 @@ The material base of AI is not silicon and algorithms. It is infrastructure owne
 
 ## Monopoly Logic
 
-Large technology firms resist regulation, oppose redistribution, and expand into unregulated niches to avoid oversight. Once established, they set prices, define terms, and control access. The goal is not market participation but market ownership.
+Large technology firms resist regulation, oppose redistribution, and expand into unregulated niches to avoid oversight. Once established as infrastructure, they set prices, define terms, and control access. The goal is not market participation but market ownership.
 
 Many of these firms built their businesses on the attention economy. Revenue depends on engagement, time spent, dependency. The model is addiction. This predates AI and now shapes its deployment.
 
