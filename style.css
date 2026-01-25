@@ -189,6 +189,7 @@ body {
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            opacity: 0.7;
         }
 
         .window-title {
@@ -335,6 +336,71 @@ body {
 
 .taskbar-item.minimized {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Blog Subpage Styles */
+#blog-subpage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 20000;
+    overflow-y: auto;
+}
+
+.blog-subpage-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.blog-header {
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(141, 149, 231, 0.8);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.back-button:hover {
+    background: rgba(141, 149, 231, 1);
+}
+
+#blog-content {
+    line-height: 1.8;
+    color: #333;
+}
+
+#blog-content h1 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+#blog-content h2 {
+    font-size: 1.4em;
+    margin-top: 30px;
+}
+
+.expand-link {
+    font-size: 11px;
+    color: #666;
+    text-decoration: none;
+}
+
+.expand-link:hover {
+    color: #333;
+    text-decoration: underline;
 }
 
 /* Mobile Responsive Styles */
