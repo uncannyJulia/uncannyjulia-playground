@@ -172,7 +172,7 @@ function createDraggableElement(iconName, index) {
     makeDraggable(dragElement);
 
     // Add click functionality to open a window
-    dragElement.addEventListener("dblclick", function (e) {
+    dragElement.addEventListener("click", function (e) {
         // Prevent click from triggering immediately during drag operations
         if (!this.isDragging) {
             // Get the label for the window title
