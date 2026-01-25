@@ -18,6 +18,12 @@ const BLOG_POSTS = [
         title: 'The AI Alignment Problem: A Smokescreen',
         date: '2026-01-24',
         file: 'blog/alignment.md'
+    },
+    {
+        id: 'lack',
+        title: 'Symbols Without Subjects: On Consciousness and Probabilistic Models',
+        date: '2026-01-25',
+        file: 'blog/lack.md'
     }
 ];
 
