@@ -1189,7 +1189,7 @@ function createProjectsWindow() {
 
     // Add click handlers for each project icon
     projectsContent.querySelectorAll('.project-icon').forEach(icon => {
-        icon.addEventListener('dblclick', () => {
+        icon.addEventListener('click', () => {
             const projectId = icon.getAttribute('data-project');
             openProjectDetail(projectId);
         });
