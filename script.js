@@ -25,6 +25,13 @@ const BLOG_POSTS = [
         date: '2026-01-25',
         file: 'blog/lack.md'
     }
+    ,
+    {
+        id: 'lack',
+        title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
+        date: '2026-01-31',
+        file: 'blog/attachment.md'
+    }
 ];
 
 // Check for blog post URL parameter and show subpage if present
