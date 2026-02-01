@@ -27,7 +27,7 @@ const BLOG_POSTS = [
     }
     ,
     {
-        id: 'lack',
+        id: 'attach',
         title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
         date: '2026-01-31',
         file: 'blog/attachment.md'
