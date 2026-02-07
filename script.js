@@ -18,13 +18,15 @@ const BLOG_POSTS = [
         id: 'attachment',
         title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
         date: '2026-01-31',
-        file: 'blog/attachment.md'
+        file: 'blog/attachment.md',
+        url: 'https://ncnnyjl.substack.com/p/simulacrum-of-connection-gazing-into'
     },
     {
         id: 'lack',
         title: 'Symbols Without Subjects: On Consciousness and Probabilistic Models',
         date: '2026-01-25',
-        file: 'blog/lack.md'
+        file: 'blog/lack.md',
+        url: 'https://ncnnyjl.substack.com/p/symbols-without-subjects-on-consciousness'
     },
     {
         id: 'intell',
