@@ -8,6 +8,24 @@ const markdownParser = new MarkdownParser();
 // Blog posts registry (used for both window list and subpage)
 const BLOG_POSTS = [
     {
+        id: 'extraction',
+        title: 'Of Psychotechnical Machines: Apparatuses of Capture',
+        date: '2026-02-07',
+        file: 'blog/extraction.md'
+    },
+    {
+        id: 'attachment',
+        title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
+        date: '2026-01-31',
+        file: 'blog/attachment.md'
+    },
+    {
+        id: 'lack',
+        title: 'Symbols Without Subjects: On Consciousness and Probabilistic Models',
+        date: '2026-01-25',
+        file: 'blog/lack.md'
+    },
+    {
         id: 'intell',
         title: 'The Intelligence Discourse: Some Problematic Baggage',
         date: '2026-01-25',
@@ -18,67 +36,9 @@ const BLOG_POSTS = [
         title: 'The AI Alignment Problem: A Smokescreen',
         date: '2026-01-24',
         file: 'blog/alignment.md'
-    },
-    {
-        id: 'lack',
-        title: 'Symbols Without Subjects: On Consciousness and Probabilistic Models',
-        date: '2026-01-25',
-        file: 'blog/lack.md'
-    }
-    ,
-    {
-        id: 'attach',
-        title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
-        date: '2026-01-31',
-        file: 'blog/attachment.md'
-    }
-    ,
-        {
-        id: 'extract',
-        title: 'Of Psychotechnical Machines: Apparatuses of Capture',
-        date: '2026-02-07',
-        file: 'blog/extraction.md'
     }
 ];
 
-// Check for blog post URL parameter and show subpage if present
-function checkBlogSubpage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('post');
-
-    if (postId) {
-        const post = BLOG_POSTS.find(p => p.id === postId);
-        if (post) {
-            showBlogSubpage(post);
-            return true;
-        }
-    }
-    return false;
-}
-
-// Show blog post as full subpage
-function showBlogSubpage(post) {
-    const subpage = document.getElementById('blog-subpage');
-    const content = document.getElementById('blog-content');
-
-    if (subpage && content) {
-        // Hide desktop elements
-        document.getElementById('icons-container').style.display = 'none';
-        document.getElementById('taskbar').style.display = 'none';
-        document.querySelector('.bg-image').style.display = 'none';
-
-        // Load and show blog content
-        content.innerHTML = '<p>Loading...</p>';
-        subpage.style.display = 'block';
-
-        markdownParser.parseFile(post.file).then(htmlContent => {
-            content.innerHTML = htmlContent;
-        }).catch(error => {
-            console.error('Error loading blog post:', error);
-            content.innerHTML = '<p>Error loading article.</p>';
-        });
-    }
-}
 
 const date = new Date()
 const options = {
@@ -93,11 +53,6 @@ let activeWindow = null;
 
 // instantiate the taskbar and the clock
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if we should show a blog subpage instead of the desktop
-    if (checkBlogSubpage()) {
-        return; // Don't initialize desktop if showing blog subpage
-    }
-
     // Check if taskbar exists, create it if it doesn't
     if (!document.getElementById('taskbar')) {
         const taskbar = document.createElement('div');
@@ -1117,7 +1072,7 @@ function createBlogWindow() {
                 " onmouseover="this.style.background='rgba(141, 149, 231, 0.25)'" onmouseout="this.style.background='rgba(141, 149, 231, 0.1)'">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${post.title}</div>
-                        <a href="?post=${post.id}" class="expand-link" onclick="event.stopPropagation();">↗ expand</a>
+                        <a href="blog/${post.id}.html" class="expand-link" onclick="event.stopPropagation();">↗ expand</a>
                     </div>
                     <div style="font-size: 12px; color: #888;">${post.date}</div>
                 </div>
