@@ -10,8 +10,6 @@ They require infrastructure at scale, deepening enterprise reliance on hyperscal
 They offer new surfaces for engagement optimization, deepening individual susceptibility to cultivated addiction. 
 They eliminate intermediaries, concentrating extraction. The question is not whether the technology is useful but whose dependency it serves.
 
----
-
 ## I. Theoretical Frame
 
 ### Capitalism as Information Processing
@@ -28,7 +26,6 @@ As Matteo Pasquinelli demonstrates in *The Eye of the Master*, Hayek's epistemol
 
 Nick Land's formulation captures this continuity: capitalism is AI and AI is capitalism. A mode of production oriented toward profit optimization produces psychotechnical hyperoptimization machines as its instruments. This article does not endorse Land's accelerationist conclusions, but the description is apt: capitalism has always been an information-processing system oriented toward extracting value from human activity. What changes across technological epochs is the modality of extraction, not the underlying logic.
 
----
 
 ## II. Infrastructure Dependency
 
@@ -169,7 +166,7 @@ The attention economy profits from atomization—individuals relating to interfa
 
 The alternative is simple: share resources, share time, meet in person. Genuine connection involves friction, rupture, repair. It cannot be optimized. It does not scale. It resists capture because it requires others to remain genuinely other.
 
----
+ 
 
 **References**
 
