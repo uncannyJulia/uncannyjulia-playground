@@ -35,7 +35,7 @@ const BLOG_POSTS = [
     ,
         {
         id: 'extract',
-        title: 'Simulacrum of Connection: Gazing into an Empty Mirror',
+        title: 'Of Psychotechnical Machines: Apparatuses of Capture',
         date: '2026-02-07',
         file: 'blog/extraction.md'
     }

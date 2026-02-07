@@ -1,4 +1,4 @@
-# Dependencies: Platform Infrastructure and the Financialization of the Private
+# Of Psychotechnical Machines: Apparatuses of Capture
 
 Dependency structures information capitalism at two scales.
 At the macro level, enterprises depend on computational infrastructure they do not control, paying rent to hyperscalers who own the means of digital production. 
