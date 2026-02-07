@@ -11,7 +11,8 @@ const BLOG_POSTS = [
         id: 'extraction',
         title: 'Of Psychotechnical Machines: Apparatuses of Capture',
         date: '2026-02-07',
-        file: 'blog/extraction.md'
+        file: 'blog/extraction.md',
+        url: 'https://ncnnyjl.substack.com/p/of-psychotechnical-machines-apparatuses'
     },
     {
         id: 'attachment',
@@ -1072,7 +1073,7 @@ function createBlogWindow() {
                 " onmouseover="this.style.background='rgba(141, 149, 231, 0.25)'" onmouseout="this.style.background='rgba(141, 149, 231, 0.1)'">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${post.title}</div>
-                        <a href="blog/${post.id}.html" class="expand-link" onclick="event.stopPropagation();">↗ expand</a>
+                        ${post.url ? `<a href="${post.url}" target="_blank" class="expand-link" onclick="event.stopPropagation();">↗ expand</a>` : ''}
                     </div>
                     <div style="font-size: 12px; color: #888;">${post.date}</div>
                 </div>
