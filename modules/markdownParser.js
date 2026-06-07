@@ -16,6 +16,9 @@ class MarkdownParser {
       { regex: /\*\*(.+?)\*\*/g, replacement: '<strong>$1</strong>' },
       { regex: /\*(.+?)\*/g, replacement: '<em>$1</em>' },
       
+      // Images (must come before links so ![alt](src) isn't parsed as a link)
+      { regex: /!\[([^\]]*)\]\(([^)]+)\)/g, replacement: '<img src="$2" alt="$1">' },
+
       // Links
       { regex: /\[([^\]]+)\]\(([^)]+)\)/g, replacement: '<a href="$2" target="_blank">$1</a>' },
       
@@ -46,7 +49,8 @@ class MarkdownParser {
 
     let html = markdown;
 
-    // Handle lists first (before other rules)
+    // Handle blockquotes and lists first (before other rules)
+    html = this.parseBlockquotes(html);
     html = this.parseLists(html);
 
     // Apply basic formatting rules
@@ -64,6 +68,57 @@ class MarkdownParser {
     html = html.replace(/<p>\s*<\/p>/g, '');
 
     return html;
+  }
+
+  /**
+   * Parse markdown blockquotes. Consecutive lines starting with '>' are grouped
+   * into a single <blockquote>; a bare '>' line separates paragraphs within it.
+   * Each block is emitted on one line so the paragraph splitter leaves it intact.
+   * @param {string} text - The text to parse
+   * @returns {string} - Text with blockquotes converted to HTML
+   */
+  parseBlockquotes(text) {
+    const lines = text.split('\n');
+    const result = [];
+    let inQuote = false;
+    let paragraphs = [];
+    let current = [];
+
+    const flushParagraph = () => {
+      if (current.length) {
+        paragraphs.push(current.join(' '));
+        current = [];
+      }
+    };
+    const closeQuote = () => {
+      flushParagraph();
+      const inner = paragraphs.map(p => `<p>${p}</p>`).join('');
+      result.push(`<blockquote>${inner}</blockquote>`);
+      paragraphs = [];
+      inQuote = false;
+    };
+
+    for (const line of lines) {
+      const match = line.match(/^>\s?(.*)$/);
+      if (match !== null) {
+        inQuote = true;
+        if (match[1].trim() === '') {
+          flushParagraph();
+        } else {
+          current.push(match[1]);
+        }
+      } else {
+        if (inQuote) {
+          closeQuote();
+        }
+        result.push(line);
+      }
+    }
+    if (inQuote) {
+      closeQuote();
+    }
+
+    return result.join('\n');
   }
 
   /**

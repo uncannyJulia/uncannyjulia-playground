@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationality as Protest</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div id="blog-subpage" style="display: block;">
+    <div class="blog-subpage-container">
+        <header class="blog-header">
+            <a href="../index.html" class="back-button">&larr; Back to Playground</a>
+        </header>
+        <article id="blog-content" class="markdown-content">
+            <p>Loading...</p>
+        </article>
+    </div>
+</div>
+<script src="../modules/markdownParser.js"></script>
+<script>
+    const parser = new MarkdownParser();
+    parser.parseFile('relationality.md').then(html => {
+        document.getElementById('blog-content').innerHTML = html;
+    });
+</script>
+</body>
+</html>

@@ -8,6 +8,54 @@ const markdownParser = new MarkdownParser();
 // Blog posts registry (used for both window list and subpage)
 const BLOG_POSTS = [
     {
+        id: 'labor',
+        title: 'A New Turn Of An Old Problem',
+        date: '2026-06-06',
+        file: 'blog/labor.md',
+        url: 'https://uncannyjuliaplayground.leaflet.pub/3mnnajuzwsk2o'
+    },
+    {
+        id: 'ocean',
+        title: 'The Ocean Does Not Answer',
+        date: '2026-06-07',
+        file: 'blog/ocean.md',
+        url: 'https://ncnnyjl.substack.com/p/the-ocean-does-not-answer'
+    },
+    {
+        id: 'cloud',
+        title: 'Should We All Move to the Cloud?',
+        date: '2026-04-17',
+        file: 'blog/cloud.md',
+        url: 'https://ncnnyjl.substack.com/p/should-we-all-move-to-the-cloud'
+    },
+    {
+        id: 'neediness',
+        title: 'The Essentialism of Neediness',
+        date: '2026-03-05',
+        file: 'blog/neediness.md',
+        url: 'https://ncnnyjl.substack.com/p/the-essentialism-of-neediness'
+    },
+    {
+        id: 'relationality',
+        title: 'Relationality as Protest',
+        date: '2026-02-23',
+        file: 'blog/relationality.md',
+        url: 'https://ncnnyjl.substack.com/p/relationality-as-protest'
+    },
+    {
+        id: 'measure',
+        title: 'The Measure and the Mirage',
+        date: '2026-02-19',
+        file: 'blog/measure.md',
+        url: 'https://ncnnyjl.substack.com/p/the-measure-and-the-mirage'
+    },
+    {
+        id: 'identity',
+        title: 'Generating the Identity Token',
+        date: '2026-02-17',
+        file: 'blog/identity.md'
+    },
+    {
         id: 'extraction',
         title: 'Of Psychotechnical Machines: Apparatuses of Capture',
         date: '2026-02-07',
