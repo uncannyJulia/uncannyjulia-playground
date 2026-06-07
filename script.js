@@ -8,6 +8,13 @@ const markdownParser = new MarkdownParser();
 // Blog posts registry (used for both window list and subpage)
 const BLOG_POSTS = [
     {
+        id: 'ocean',
+        title: 'The Ocean Does Not Answer',
+        date: '2026-06-07',
+        file: 'blog/ocean.md',
+        url: 'https://ncnnyjl.substack.com/p/the-ocean-does-not-answer'
+    },
+    {
         id: 'labor',
         title: 'A New Turn Of An Old Problem',
         date: '2026-06-06',
@@ -15,11 +22,11 @@ const BLOG_POSTS = [
         url: 'https://uncannyjuliaplayground.leaflet.pub/3mnnajuzwsk2o'
     },
     {
-        id: 'ocean',
-        title: 'The Ocean Does Not Answer',
-        date: '2026-06-07',
-        file: 'blog/ocean.md',
-        url: 'https://ncnnyjl.substack.com/p/the-ocean-does-not-answer'
+        id: 'cache',
+        title: 'The Probabilistic Cache',
+        date: '2026-06-06',
+        file: 'blog/cache.md',
+        url: 'https://uncannyjuliaplayground.leaflet.pub/3mnngndimac2c'
     },
     {
         id: 'cloud',
