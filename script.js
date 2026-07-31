@@ -8,6 +8,20 @@ const markdownParser = new MarkdownParser();
 // Blog posts registry (used for both window list and subpage)
 const BLOG_POSTS = [
     {
+        id: 'neurosymbolic',
+        title: 'Whitepaper — The Neuro-symbolic Legal System: A Two-Layer Architecture for Executable Law',
+        date: '2026-06',
+        file: 'content/whitepaper-graph-future.pdf',
+        url: 'blog/neurosymbolic.html'
+    },
+    {
+        id: 'rulegraph',
+        title: 'Whitepaper — RuleGraph: A Legal Knowledge Graph with Executable Examination Logic',
+        date: '2026-05',
+        file: 'content/whitepaper-current-graph.pdf',
+        url: 'blog/rulegraph.html'
+    },
+    {
         id: 'ocean',
         title: 'The Ocean Does Not Answer',
         date: '2026-06-07',
@@ -1145,7 +1159,12 @@ function createBlogWindow() {
         item.addEventListener('click', () => {
             const file = item.getAttribute('data-file');
             const title = item.getAttribute('data-title');
-            createWindow(title, '', '#e67e22', 600, 500, null, false, file);
+            if (file.endsWith('.pdf')) {
+                // PDFs open in an iframe window instead of the markdown viewer
+                createWindow(title, '', '#e67e22', 700, 600, file);
+            } else {
+                createWindow(title, '', '#e67e22', 600, 500, null, false, file);
+            }
         });
     });
 }
