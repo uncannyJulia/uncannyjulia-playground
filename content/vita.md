@@ -11,3 +11,5 @@ I care about building AI that actually helps people - transparent systems that s
 Technical background: Python, GCP, Kubernetes, Graph Neural Networks, LLMs. Academic background: MSc Clinical Psychology (IPU Berlin), CAS Advanced Machine Learning (Uni Bern), PhD in progress (Uni Basel).
 
 Languages: German (native), English (fluent), Russian (some).
+
+[📄 View my full CV](cv.html)

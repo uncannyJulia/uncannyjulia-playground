@@ -295,7 +295,9 @@ and explainable AI solutions.
 
 ## Languages
 
-**German** (Native) | **English** (Fluent) | **Russian** (Moderate)`;
+**German** (Native) | **English** (Fluent) | **Russian** (Moderate)
+
+[📄 View my full CV](cv.html)`;
 
     return this.parse(vitaMarkdown);
   }
